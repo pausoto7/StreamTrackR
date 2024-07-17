@@ -1,0 +1,43 @@
+---
+title: "YukonWeekly"
+author: "psoto"
+date: "2024-06-28"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(flextable)
+library(officer)
+library(dplyr)
+
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+# Create a data frame with sample data
+data <- data.frame(
+  Name = c("Alice", "Bob", "Charlie", "David"),
+  Age = c(24, 30, 22, 35),
+  Occupation = c("Engineer", "Doctor", "Artist", "Lawyer")
+)
+
+# Create a flextable object
+ft <- flextable(data)
+
+# Apply conditional formatting
+ft <- ft %>%
+  bg(i = ~ Age > 25, j = "Age", bg = "lightcoral") %>%
+  bg(i = ~ Age < 30, j = "Age", bg = "palegreen") %>%
+  color(i = ~ Age > 25, j = "Age", color = "white") %>%
+  color(i = ~ Age < 30, j = "Age", color = "black")
+
+# Print the table
+ft
+```
+

@@ -1,0 +1,56 @@
+---
+title: "Historical Water Level Report"
+author: "Your Name"
+date: "`r Sys.Date()`"
+output: html_document
+params: 
+  stations: stations
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(dplyr)
+library(ggplot2)
+library(lubridate)
+
+
+```
+
+# Example data: Replace this with actual data loading code
+# Assume data is in a dataframe `water_data` with columns: station, date, water_level
+
+```{r read data, echo=FALSE}
+
+
+station_list <- list()
+
+for (stns in 1:length(stations)){
+  
+  hydro_data <- dl_and_wrangle_tidydydat(station_number = stns, start_date = NA, end_date = Sys.Date())
+
+  stats_table <- create_stats_table(hydro_data, YOI = 2024)
+  
+  station_list[[stns]] <- stats_table
+}
+
+all_hydro_stats_tables <- bind_rows(station_list)
+
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+# Display results
+stations <- unique(weekly_stats$station)
+
+for (station in stations) {
+  station_data <- filter(weekly_stats, station == !!station)
+  
+  cat("###", station, "\n")
+  knitr::kable(station_data, col.names = c("Station", "This Week's Avg WL", "Historical Mean WL", "Historical Q25 WL", "Historical Q75 WL", "Trajectory"))
+  cat("\n\n")
+}```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
