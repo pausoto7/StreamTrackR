@@ -6,7 +6,7 @@ rmarkdown::render(
   output_file = paste0("Yukon Condition Report ", Sys.Date()),
   output_dir = "choose",
   params = list(
-    stations = stations,
+    stations = c("08MF005", "08NM174"),
     report_name = "Yukon Conditions Report",
   )  
 )

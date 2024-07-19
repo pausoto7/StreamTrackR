@@ -1,0 +1,24 @@
+---
+title: "YukonWeekly_Child"
+author: "psoto"
+date: "2024-07-19"
+output: html_document
+params:
+  station_data: station_data
+  YOI: YOI
+---
+
+```{r child doc, echo=FALSE, include=FALSE, results='asis'}
+
+  message("Start child")
+
+  stats_table <- create_stats_table(params$station_data, YOI = params$YOI)
+
+  stats_table$perc_hist <- formattable::formattable(stats_table$perc_hist, formatter = format_color)
+
+
+  kbl(stats_table, "html", booktabs = TRUE, escape = FALSE)
+
+
+
+```
