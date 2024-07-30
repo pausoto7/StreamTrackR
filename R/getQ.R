@@ -70,6 +70,7 @@ create_stats_table <- function(all_hydro_data, YOI = 2024){
     WL_PERCENT <- round(100*current_WL/single_day_hist_mean_WL,2)
     Q_PERCENT <- round(100*current_Q/single_day_hist_mean_Q,2)
     
+    
 
     
     station_numb <- unique(all_hydro_data_historical$STATION_NUMBER)
@@ -86,7 +87,8 @@ create_stats_table <- function(all_hydro_data, YOI = 2024){
     
     single_day_historical_stats_df <- single_day_historical_stats %>%
       mutate(MAD = ifelse(Parameter == "Flow", mean_MAD, NA), 
-             hist_mean = ifelse(Parameter == "Flow",single_day_hist_mean_Q, single_day_hist_mean_WL), 
+             hist_mean = ifelse(Parameter == "Flow",single_day_hist_mean_Q, 
+                                single_day_hist_mean_WL), 
              PERCENT = ifelse(Parameter == "Flow", Q_PERCENT, WL_PERCENT), 
              change_72hrs = ifelse(Parameter == "Flow",current_Q - Q_72hrs_ago , 
                                    current_WL - WL_72hrs_ago), 
@@ -98,6 +100,17 @@ create_stats_table <- function(all_hydro_data, YOI = 2024){
              
     single_day_historical_stats_df <- single_day_historical_stats_df %>%
       select(station_name, station_numb, Parameter, mean_today, hist_mean, PERCENT,  q25_today, q75_today, change_72hrs, Trajectory )
+    
+    round_and_format <- function(x) {
+      if (is.numeric(x)) {
+        format(round(x, 3), nsmall = 3)
+      } else {
+        x
+      }
+    }
+    
+    single_day_historical_stats_df <- single_day_historical_stats_df %>%
+      mutate(across(where(is.numeric), round_and_format))    
     
     
     #     # CREATLY WEEKLY STATS TABLE
