@@ -1,5 +1,5 @@
 ---
-title: "Historical Water Level Report"
+title: "Weekly Hydrometric Water Level Report"
 author: "DFO"
 date: "`r format(Sys.Date(), '%B %d, %Y')`"
 output: 
@@ -13,13 +13,14 @@ params:
 ---
 
 
-```{r setup, echo = FALSE, include=FALSE}
+```{r setup, echo = FALSE, results='asis', warning=FALSE, message=FALSE}
 
-htmltools::img(src = "images/DFO_logo.png", 
-               alt = 'logo', 
-               style = 'position:absolute; top:0; right:0; padding:10px;')
+cat('<img src="images/DFO_logo.png" alt="logo" style="position:absolute; top:0; right:0; padding:10px;">')
+  cat('\n\n<!-- -->\n\n')
+  cat('\n\n<!-- -->\n\n')
+  cat('\n\n<!-- -->\n\n')
 
-#knitr::opts_chunk$set(echo = TRUE)
+
 
 library(rmarkdown)
 library(dplyr)
@@ -40,8 +41,11 @@ source("R/getQ.R")
 
 
 ```
-## Summary of water level, discharge and water level changes
+## **Summary of water level, discharge and water level changes**
+
 ##### Level data is pulled from historical and real-time hydrometric data published by Water Survey of Canada.WL is measured in meters and discharge is measured in m3/s for all stations. 
+
+---
 
 ```{r read data, include=FALSE}
 
@@ -83,8 +87,6 @@ format_mean <- function(x, Q25, Q75) {
 
 ``` {r loop chunk, echo=FALSE, results='asis', message = FALSE, warning = FALSE, fig.width = 11, fig.height = 5}
 
-#knitr::opts_chunk$set( )
-
 
 walk(uniq_stns, function(st){
   
@@ -97,17 +99,16 @@ walk(uniq_stns, function(st){
   stats_table_raw <- create_stats_table(st_df, YOI = YOI)
   
   cat('\n\n<!-- -->\n\n')
-  cat('\n\n<!-- -->\n\n')
   cat(paste0("### ", unique(stats_table_raw$station_name), "\n\n"))
   cat('\n\n<!-- -->\n\n')
 
   stats_table <- stats_table_raw %>% select(-station_name)
   
-  colnames(stats_table) <- c("Station Number", "Param", "Mean (Today)",
+  colnames(stats_table) <- c("Station Number", "Parameter", "Mean (Today)",
                              "Historical Mean (Today)", "Percent of Historical", 
                              "Q25 (Today)", "Q75 (Today)",  "72 Hr Change", "Trajectory")
   
-
+# Add formatting to Formatted Mean column which will eventually get changed to Historical Mean
 stats_table <- stats_table %>%
   rowwise() %>%
   mutate(`Formatted Mean (Today)` = list(format_mean(`Historical Mean (Today)`,
@@ -120,19 +121,24 @@ stats_table <- stats_table %>%
   mutate(`Formatted Mean (Today)` = sapply(`Formatted Mean (Today)`, as.character))
 
 
-# Print the formatted table
+#  save formattable table to be printed
 formattable_table <- formattable(stats_table %>% 
                                   select(-`Historical Mean (Today)`, `Q25 (Today)`, `Q75 (Today)`) %>%
                                   rename(`Historical Mean (Today)` = `Formatted Mean (Today)`) %>%
-                                   select("Station Number", "Param", "Mean (Today)", "Historical Mean (Today)",
+                                   select("Station Number", "Parameter", "Mean (Today)", "Historical Mean (Today)",
                                           "Percent of Historical",  "Q25 (Today)", "Q75 (Today)",  "72 Hr Change", "Trajectory"))
 
 
 # Convert to HTML and style the table
-html_table <- knitr::kable(formattable_table, "html", escape = FALSE) %>%
-  kable_styling(full_width = TRUE)
+html_table <- knitr::kable(formattable_table,
+                           "html",
+                           escape = FALSE, 
+                           align = "c") %>%
+  kable_styling(full_width = TRUE) %>%
+  row_spec(row = 0, color = "white", background = "#0097A9") 
 
 print(html_table)
+  cat("<br>") # Adds extra space
 
 
   # SET UP HYDROGRAPH ------------------------------------------------
@@ -146,10 +152,18 @@ print(html_table)
 
   print(hydroGraphR::create_hydrograph_separate(all_hydro_sites_historical = st_df_past,
                                               all_hydro_sites_1yr = sf_df_currentYr, output_type = "print"))
+  cat('\n\n<!-- -->\n\n')
 
+  #line across
+  cat("<hr>")
+  
+    
+  cat("<br>") # Adds extra space
 
-
+    
 })
+
+
 ```
 
 
