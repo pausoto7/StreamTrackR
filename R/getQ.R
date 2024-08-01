@@ -106,25 +106,11 @@ create_stats_table <- function(all_hydro_data, YOI = 2024){
     }
     
     single_day_historical_stats_df <- single_day_historical_stats_df %>%
-      mutate(across(where(is.numeric), round_and_format))    
+      mutate(across(where(is.numeric), round_and_format)) %>%
+      mutate(PERCENT = round(as.numeric(PERCENT))) %>%
+      mutate_all(as.character())
     
-    
-    #     # CREATLY WEEKLY STATS TABLE
-    # stats_table <- all_hydro_data_historical %>%
-    #   group_by(Parameter) %>%
-    #   summarise(MAD = mean(Value, na.rm = TRUE), 
-    #             q25 = quantile(Value, 0.25, na.rm = TRUE), 
-    #             q75 = quantile(Value, 0.75, na.rm = TRUE)) %>%
-    #   ungroup() %>%
-    #   mutate(perc_hist = ifelse(Parameter =="Flow", Q_PERCENT, WL_PERCENT), 
-    #          change_72hrs = ifelse(Parameter == "Flow",current_Q - Q_72hrs_ago , 
-    #                                current_WL - WL_72hrs_ago), 
-    #          Trajectory = ifelse(change_72hrs > 0, "Rising", 
-    #                              ifelse(change_72hrs == 0, "Steady", 
-    #                                     "Falling"))) %>%
-    #   mutate(station_numb = station_numb, .before = "Parameter") %>%
-    #   mutate(station_name = station_name, .before = "station_numb")
-    
+
     return(single_day_historical_stats_df)
     #print("Succesfully returned table")
     
@@ -142,72 +128,5 @@ create_stats_table <- function(all_hydro_data, YOI = 2024){
 
 
 
-
-
-
-
-# dl_and_wrangle_tidydydat <- function(station_number = "09EB001", start_date = NA, end_date = Sys.Date()){
-#   
-#   
-#   # get level and wrangle ------------------------------------------------------
-#   level_historic <- tidyhydat::hy_daily_levels(station_number = "09EB001") 
-#   
-#   level_final_date <- tail(level_historic, 1)$Date
-#   
-#   level_real_time <- tidyhydat::realtime_ws(
-#     station_number = "09EB001", 
-#     parameters = 46, 
-#     start_date = level_final_date, 
-#     end_date = Sys.Date()
-#   ) 
-#   
-#   level_real_time <- level_real_time %>% 
-#     mutate(Parameter = "Level") %>%
-#     select(-Name_En, -Unit, -Grade, -Approval, -Code)
-#   
-#   
-#   # get flow and wrangle ------------------------------------------------------
-#   
-#   flow_historic <- tidyhydat::hy_daily_flows(station_number = "09EB001")
-#   
-#   discharge_final_date <- tail(flow_historic, 1)$Date
-#   
-#   flow_real_time <- tidyhydat::realtime_ws(
-#     station_number = "09EB001", 
-#     parameters = 47, 
-#     start_date = discharge_final_date, 
-#     end_date = Sys.Date()
-#   )
-#   
-#   flow_real_time <- flow_real_time %>% 
-#     select(-Name_En, -Unit, -Grade, -Approval, -Code) %>%
-#     group_by(Date = as.Date(Date)) %>%
-#     summarise(Value = mean(Value, na.rm = TRUE)) %>%
-#     mutate(Parameter = "Flow", 
-#            STATION_NUMBER = station_number) 
-#     
-#   
-#   
-#   
-#   # combine all flow and discharge into one df
-#   
-#   all_hydro_data <- level_historic %>%
-#     full_join(level_real_time) %>%
-#     full_join(flow_historic) %>%
-#     full_join(flow_real_time)
-#   
-#   
-#   if (is.na(start_date)){
-#     start_date <- min(all_hydro_data$Date)
-#     
-#   }
-#   
-#   all_hydro_data <- all_hydro_data %>%
-#     dplyr::filter(Date >= start_date, 
-#            Date <= end_date)
-# 
-#   return(all_hydro_data)
-# }
-# 
 
 

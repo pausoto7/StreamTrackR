@@ -2,7 +2,9 @@
 title: "Historical Water Level Report"
 author: "DFO"
 date: "`r format(Sys.Date(), '%B %d, %Y')`"
-output: html_document
+output: 
+  html_document:
+    keep_md: yes
 params: 
   stations: 
     - "08MF005"
@@ -10,8 +12,15 @@ params:
   YOI: 2024
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+
+```{r setup, echo = FALSE, include=FALSE}
+
+htmltools::img(src = "images/DFO_logo.png", 
+               alt = 'logo', 
+               style = 'position:absolute; top:0; right:0; padding:10px;')
+
+#knitr::opts_chunk$set(echo = TRUE)
+
 library(rmarkdown)
 library(dplyr)
 library(ggplot2)
@@ -26,8 +35,9 @@ library(data.table)
 library(htmltools)
 library(knitr)
 
-
 source("R/getQ.R")
+
+
 
 ```
 ## Summary of water level, discharge and water level changes
@@ -87,6 +97,7 @@ walk(uniq_stns, function(st){
   stats_table_raw <- create_stats_table(st_df, YOI = YOI)
   
   cat('\n\n<!-- -->\n\n')
+  cat('\n\n<!-- -->\n\n')
   cat(paste0("### ", unique(stats_table_raw$station_name), "\n\n"))
   cat('\n\n<!-- -->\n\n')
 
@@ -108,12 +119,14 @@ stats_table <- stats_table %>%
   ungroup() %>%
   mutate(`Formatted Mean (Today)` = sapply(`Formatted Mean (Today)`, as.character))
 
+
 # Print the formatted table
 formattable_table <- formattable(stats_table %>% 
                                   select(-`Historical Mean (Today)`, `Q25 (Today)`, `Q75 (Today)`) %>%
                                   rename(`Historical Mean (Today)` = `Formatted Mean (Today)`) %>%
                                    select("Station Number", "Param", "Mean (Today)", "Historical Mean (Today)",
                                           "Percent of Historical",  "Q25 (Today)", "Q75 (Today)",  "72 Hr Change", "Trajectory"))
+
 
 # Convert to HTML and style the table
 html_table <- knitr::kable(formattable_table, "html", escape = FALSE) %>%
