@@ -1,0 +1,149 @@
+---
+title: "Historical Water Level Report"
+author: "DFO"
+date: "`r format(Sys.Date(), '%B %d, %Y')`"
+output: html_document
+params: 
+  stations: 
+    - "08MF005"
+    - "08NM174"
+  YOI: 2024
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(rmarkdown)
+library(dplyr)
+library(ggplot2)
+library(lubridate)
+library(tidyhydat)
+library(hydroGraphR)
+library(flextable)
+library(kableExtra)
+library(purrr)
+library(formattable)
+library(data.table)
+library(htmltools)
+library(knitr)
+
+
+source("R/getQ.R")
+
+```
+## Summary of water level, discharge and water level changes
+##### Level data is pulled from historical and real-time hydrometric data published by Water Survey of Canada.WL is measured in meters and discharge is measured in m3/s for all stations. 
+
+```{r read data, include=FALSE}
+
+stations <- params$stations
+
+# Accessing the YOI parameter
+YOI <- params$YOI
+
+message("Downloading hydro data...")
+all_stations_data <- hydroGraphR::dl_hydro(stations)
+
+uniq_stns <- all_stations_data %>% 
+  distinct(STATION_NUMBER) 
+
+uniq_stns <- uniq_stns$STATION_NUMBER
+
+
+```
+
+
+
+```{r stations data, include = FALSE,  results='asis'}
+
+# gradient_color -----------------------------------
+
+format_color <- function(x) {
+  ifelse(x < 80, formattable::color_tile("red", "#FFFFEE")(x), color_tile("#EEFFEF", "olivedrab")(x))
+}
+
+# ---------------------------------------------------
+
+format_mean <- function(x, Q25, Q75) {
+  formattable::formatter("span", style = ~ formattable::style(
+    background = ifelse(x >= Q25 & x <= Q75, "#bef7a6", "#f7a6a6")
+  ))(x)
+}
+
+```
+
+``` {r loop chunk, echo=FALSE, results='asis', message = FALSE, warning = FALSE, fig.width = 11, fig.height = 5}
+
+#knitr::opts_chunk$set( )
+
+
+walk(uniq_stns, function(st){
+  
+  st_df <- all_stations_data %>% 
+    filter(STATION_NUMBER %in% st)
+  
+  max_date <-as.Date(paste(as.character(params$YOI-1), "12", "31", sep = "-"))
+  
+
+  stats_table_raw <- create_stats_table(st_df, YOI = YOI)
+  
+  cat('\n\n<!-- -->\n\n')
+  cat(paste0("### ", unique(stats_table_raw$station_name), "\n\n"))
+  cat('\n\n<!-- -->\n\n')
+
+  stats_table <- stats_table_raw %>% select(-station_name)
+  
+  colnames(stats_table) <- c("Station Number", "Param", "Mean (Today)",
+                             "Historical Mean (Today)", "Percent of Historical", 
+                             "Q25 (Today)", "Q75 (Today)",  "72 Hr Change", "Trajectory")
+  
+
+stats_table <- stats_table %>%
+  rowwise() %>%
+  mutate(`Formatted Mean (Today)` = list(format_mean(`Historical Mean (Today)`,
+                                                     `Q25 (Today)`,
+                                                     `Q75 (Today)`)))
+
+# Unnest the formatted column for correct display
+stats_table <- stats_table %>% 
+  ungroup() %>%
+  mutate(`Formatted Mean (Today)` = sapply(`Formatted Mean (Today)`, as.character))
+
+# Print the formatted table
+formattable_table <- formattable(stats_table %>% 
+                                  select(-`Historical Mean (Today)`, `Q25 (Today)`, `Q75 (Today)`) %>%
+                                  rename(`Historical Mean (Today)` = `Formatted Mean (Today)`) %>%
+                                   select("Station Number", "Param", "Mean (Today)", "Historical Mean (Today)",
+                                          "Percent of Historical",  "Q25 (Today)", "Q75 (Today)",  "72 Hr Change", "Trajectory"))
+
+# Convert to HTML and style the table
+html_table <- knitr::kable(formattable_table, "html", escape = FALSE) %>%
+  kable_styling(full_width = TRUE)
+
+print(html_table)
+
+
+  # SET UP HYDROGRAPH ------------------------------------------------
+
+  st_df_Q <- st_df %>%
+    filter(Parameter == "Flow")
+  
+  st_df_past <- create_hydro_stats_historical(st_df_Q, date_minimum = NA, date_maximum = max_date)
+  sf_df_currentYr <- create_hydro_stats_singleYr(st_df_Q, params$YOI, WY = "no")
+
+
+  print(hydroGraphR::create_hydrograph_separate(all_hydro_sites_historical = st_df_past,
+                                              all_hydro_sites_1yr = sf_df_currentYr, output_type = "print"))
+
+
+
+})
+```
+
+
+
+
+
+
+
+
+

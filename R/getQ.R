@@ -1,8 +1,4 @@
 
-
-
-
-
 create_stats_table <- function(all_hydro_data, YOI = 2024){
   
 
