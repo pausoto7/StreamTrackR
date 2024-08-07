@@ -7,8 +7,8 @@ output:
     keep_md: yes
 params: 
   stations: 
-    - "08MF005"
-    - "08NM174"
+    - "09AG001"
+    - "09CA002"
   YOI: 2024
 ---
 
@@ -35,6 +35,7 @@ library(formattable)
 library(data.table)
 library(htmltools)
 library(knitr)
+library(htmlwidgets)
 
 source("R/getQ.R")
 
@@ -43,7 +44,37 @@ source("R/getQ.R")
 ```
 ## **Summary of water level, discharge and water level changes**
 
-##### Level data is pulled from historical and real-time hydrometric data published by Water Survey of Canada.WL is measured in meters and discharge is measured in m3/s for all stations. 
+##### Level data is pulled from historical and real-time hydrometric data published by Water Survey of Canada.
+
+
+---
+
+```{r create def table, echo=FALSE, results='asis'}
+
+# Create a data frame with definitions
+definitions <- data.frame(
+  Term = c("Station Number", "Parameter", "Mean (Today)",
+           "Historical Mean (Today)", "Percent of Historical",
+           "MAD", "Q25 (Today)", "Q75 (Today)", "72 Hr Change", "Trajectory"),
+  
+  Definition = c("WSC station number.", 
+                 "Parameter type, either flow or water level.",
+                 "The average value of today's (or most recent date captured) measurements.",
+                 "The average value of the measurements on this date over the historical period.",
+                 "The percentage of today's value compared to the historical average.",
+                 "Mean Absolute Deviation, a measure of variability from the historical mean.",
+                 "The 25th percentile of today's data distribution, indicating that 25% of the data points are below this value.",
+                 "The 75th percentile of today's data distribution, indicating that 75% of the data points are below this value.",
+                 "The change in the measurement over the past 72 hours.",
+                 "The trend or direction of the measurement over a three day period.")
+)
+
+# Create the kable table
+kable(definitions, "html", escape = FALSE, col.names = c("Term", "Definition")) %>%
+  kable_styling(full_width = TRUE, position = "left") %>%
+  row_spec(0, bold = TRUE, background = "#f0f0f0")
+
+```
 
 ---
 
@@ -85,7 +116,7 @@ format_mean <- function(x, Q25, Q75) {
 
 ```
 
-``` {r loop chunk, echo=FALSE, results='asis', message = FALSE, warning = FALSE, fig.width = 11, fig.height = 5}
+``` {r loop chunk, echo=FALSE, results='asis',  fig.width = 11, fig.height = 5, message = FALSE, warning = FALSE}
 
 
 walk(uniq_stns, function(st){
@@ -105,53 +136,58 @@ walk(uniq_stns, function(st){
   stats_table <- stats_table_raw %>% select(-station_name)
   
   colnames(stats_table) <- c("Station Number", "Parameter", "Mean (Today)",
-                             "Historical Mean (Today)", "Percent of Historical", 
+                             "Historical Mean (Today)", "Percent of Historical", "MAD",
                              "Q25 (Today)", "Q75 (Today)",  "72 Hr Change", "Trajectory")
   
 # Add formatting to Formatted Mean column which will eventually get changed to Historical Mean
-stats_table <- stats_table %>%
-  rowwise() %>%
-  mutate(`Formatted Mean (Today)` = list(format_mean(`Historical Mean (Today)`,
+  stats_table <- stats_table %>%
+    rowwise() %>%
+    mutate(`Formatted Mean (Today)` = list(format_mean(`Historical Mean (Today)`,
                                                      `Q25 (Today)`,
                                                      `Q75 (Today)`)))
 
 # Unnest the formatted column for correct display
-stats_table <- stats_table %>% 
-  ungroup() %>%
-  mutate(`Formatted Mean (Today)` = sapply(`Formatted Mean (Today)`, as.character))
+  stats_table <- stats_table %>% 
+    ungroup() %>%
+    mutate(`Formatted Mean (Today)` = sapply(`Formatted Mean (Today)`, as.character))
 
 
 #  save formattable table to be printed
-formattable_table <- formattable(stats_table %>% 
+  formattable_table <- formattable(stats_table %>% 
                                   select(-`Historical Mean (Today)`, `Q25 (Today)`, `Q75 (Today)`) %>%
                                   rename(`Historical Mean (Today)` = `Formatted Mean (Today)`) %>%
                                    select("Station Number", "Parameter", "Mean (Today)", "Historical Mean (Today)",
-                                          "Percent of Historical",  "Q25 (Today)", "Q75 (Today)",  "72 Hr Change", "Trajectory"))
+                                          "Percent of Historical", "MAD", "Q25 (Today)", "Q75 (Today)",  "72 Hr Change", "Trajectory"))
 
 
 # Convert to HTML and style the table
-html_table <- knitr::kable(formattable_table,
+  html_table <- knitr::kable(formattable_table,
                            "html",
                            escape = FALSE, 
                            align = "c") %>%
   kable_styling(full_width = TRUE) %>%
   row_spec(row = 0, color = "white", background = "#0097A9") 
 
-print(html_table)
+  print(html_table)
   cat("<br>") # Adds extra space
 
 
-  # SET UP HYDROGRAPH ------------------------------------------------
 
-  st_df_Q <- st_df %>%
-    filter(Parameter == "Flow")
+
   
-  st_df_past <- create_hydro_stats_historical(st_df_Q, date_minimum = NA, date_maximum = max_date)
-  sf_df_currentYr <- create_hydro_stats_singleYr(st_df_Q, params$YOI, WY = "no")
+  st_df_past <- create_hydro_stats_historical(st_df, date_minimum = NA, date_maximum = max_date)
+  sf_df_currentYr <- create_hydro_stats_singleYr(st_df, params$YOI, WY = "no")
+
+  
+  # SET UP HYDROGRAPH ------------------------------------------------
 
 
   print(hydroGraphR::create_hydrograph_separate(all_hydro_sites_historical = st_df_past,
-                                              all_hydro_sites_1yr = sf_df_currentYr, output_type = "print"))
+                                              all_hydro_sites_1yr = sf_df_currentYr, 
+                                              parameter = "flow",
+                                              output_type = "print"))
+
+
   cat('\n\n<!-- -->\n\n')
 
   #line across
