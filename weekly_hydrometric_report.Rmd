@@ -8,7 +8,18 @@ output:
 params: 
   stations: 
     - "09AG001"
+    - "09EA006"
     - "09CA002"
+    - "09AE006"
+    - "09BC001"
+    - "09FD003"
+    - "09DD003"
+    - "09AC001"
+    - "09CD001"
+    - "09AH001"
+    - "09EB001"
+    - "09AB001"
+    
   YOI: 2024
 ---
 
@@ -71,8 +82,10 @@ definitions <- data.frame(
 
 # Create the kable table
 kable(definitions, "html", escape = FALSE, col.names = c("Term", "Definition")) %>%
-  kable_styling(full_width = TRUE, position = "left") %>%
+  kable_styling(full_width = TRUE, position = "left", bootstrap_options = "condensed") %>%
   row_spec(0, bold = TRUE, background = "#f0f0f0")
+
+  cat("<br>") # Adds extra space
 
 ```
 
@@ -89,7 +102,7 @@ message("Downloading hydro data...")
 all_stations_data <- hydroGraphR::dl_hydro(stations)
 
 uniq_stns <- all_stations_data %>% 
-  distinct(STATION_NUMBER) 
+  dplyr::distinct(STATION_NUMBER) 
 
 uniq_stns <- uniq_stns$STATION_NUMBER
 
@@ -110,9 +123,12 @@ format_color <- function(x) {
 
 format_mean <- function(x, Q25, Q75) {
   formattable::formatter("span", style = ~ formattable::style(
-    background = ifelse(x >= Q25 & x <= Q75, "#bef7a6", "#f7a6a6")
+    background = ifelse("NA", 
+                        "NA", 
+                        ifelse(x >= Q25 & x <= Q75, "#bef7a6", "#f7a6a6"))
   ))(x)
 }
+
 
 ```
 
@@ -127,7 +143,10 @@ walk(uniq_stns, function(st){
   max_date <-as.Date(paste(as.character(params$YOI-1), "12", "31", sep = "-"))
   
 
-  stats_table_raw <- create_stats_table(st_df, YOI = YOI)
+  stats_table_info<- create_stats_table(st_df, YOI = YOI)
+  
+  stats_table_raw <- stats_table_info[[1]]
+  
   
   cat('\n\n<!-- -->\n\n')
   cat(paste0("### ", unique(stats_table_raw$station_name), "\n\n"))
@@ -142,7 +161,7 @@ walk(uniq_stns, function(st){
 # Add formatting to Formatted Mean column which will eventually get changed to Historical Mean
   stats_table <- stats_table %>%
     rowwise() %>%
-    mutate(`Formatted Mean (Today)` = list(format_mean(`Historical Mean (Today)`,
+    mutate(`Formatted Mean (Today)` = list(format_mean(`Mean (Today)`,
                                                      `Q25 (Today)`,
                                                      `Q75 (Today)`)))
 
@@ -154,8 +173,8 @@ walk(uniq_stns, function(st){
 
 #  save formattable table to be printed
   formattable_table <- formattable(stats_table %>% 
-                                  select(-`Historical Mean (Today)`, `Q25 (Today)`, `Q75 (Today)`) %>%
-                                  rename(`Historical Mean (Today)` = `Formatted Mean (Today)`) %>%
+                                  select(-`Mean (Today)`, `Q25 (Today)`, `Q75 (Today)`) %>%
+                                  rename(`Mean (Today)` = `Formatted Mean (Today)`) %>%
                                    select("Station Number", "Parameter", "Mean (Today)", "Historical Mean (Today)",
                                           "Percent of Historical", "MAD", "Q25 (Today)", "Q75 (Today)",  "72 Hr Change", "Trajectory"))
 
@@ -165,27 +184,42 @@ walk(uniq_stns, function(st){
                            "html",
                            escape = FALSE, 
                            align = "c") %>%
-  kable_styling(full_width = TRUE) %>%
+  kableExtra::kable_styling(full_width = TRUE) %>%
+  kableExtra::footnote(general_title = "", 
+                       general = paste("Note:\n", stats_table_info[2], "\n   ", stats_table_info[3])) %>%
   row_spec(row = 0, color = "white", background = "#0097A9") 
 
   print(html_table)
   cat("<br>") # Adds extra space
 
 
-
-
-  
+  # gets stats for flow and WL separately 
   st_df_past <- create_hydro_stats_historical(st_df, date_minimum = NA, date_maximum = max_date)
   sf_df_currentYr <- create_hydro_stats_singleYr(st_df, params$YOI, WY = "no")
 
   
   # SET UP HYDROGRAPH ------------------------------------------------
 
+  if (nrow(sf_df_currentYr %>% dplyr::filter(Parameter == "Flow")) == 0){
+    
+      print(hydroGraphR::create_hydrograph_separate(all_hydro_sites_historical = st_df_past,
+                                              all_hydro_sites_1yr = sf_df_currentYr, 
+                                              parameter = "level",
+                                              output_type = "print", 
+                                              WY = "no"))
 
-  print(hydroGraphR::create_hydrograph_separate(all_hydro_sites_historical = st_df_past,
+    
+  }else{
+    
+      print(hydroGraphR::create_hydrograph_separate(all_hydro_sites_historical = st_df_past,
                                               all_hydro_sites_1yr = sf_df_currentYr, 
                                               parameter = "flow",
-                                              output_type = "print"))
+                                              output_type = "print",
+                                              WY = "no"))
+
+  }
+  
+  
 
 
   cat('\n\n<!-- -->\n\n')
