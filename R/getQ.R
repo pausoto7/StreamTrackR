@@ -5,16 +5,16 @@ create_hydro_stats <- function(all_hydro_data_historical, all_hydro_data_YOI, pa
   
   
   all_hydro_data_YOI <- all_hydro_data_YOI %>% dplyr::filter(Parameter == param_type)
-
+  station_numb <- unique(all_hydro_data_YOI$STATION_NUMBER)
   
   # Check to see that the YOI exists for this station
   if (nrow(all_hydro_data_YOI) > 0){
     
-    # DOES TODAYS DATE EXIST FOR WL
+    # DOES TODAYS DATE EXIST 
     if(any(as.Date(all_hydro_data_YOI$Date) %in% Sys.Date())){
       
       current_data <- all_hydro_data_YOI %>%
-        filter(as.Date(Date) == Sys.Date())
+        dplyr::filter(as.Date(Date) == Sys.Date())
       
       current_mean_value <- mean(current_data$Value, na.rm = TRUE)
       
@@ -25,7 +25,7 @@ create_hydro_stats <- function(all_hydro_data_historical, all_hydro_data_YOI, pa
       df_Date <- as.Date(tail(all_hydro_data_YOI, 1)$Date)
       
       current_data <- all_hydro_data_YOI %>%
-        filter(as.Date(Date) == df_Date)
+        dplyr::filter(as.Date(Date) == df_Date)
       
       current_mean_value <- mean(current_data$Value, na.rm = TRUE)
 
@@ -48,15 +48,14 @@ create_hydro_stats <- function(all_hydro_data_historical, all_hydro_data_YOI, pa
     
 
     single_day_historical_stats <- single_day_historical %>%
-      summarise(mean_today = mean(Value, na.rm = TRUE), 
+      dplyr::summarise(mean_today = mean(Value, na.rm = TRUE), 
                 q25_today = quantile(Value, 0.25, na.rm = TRUE), 
                 q75_today = quantile(Value, 0.75, na.rm = TRUE))
     
     #  PERCENT HISTORIC PER DAY
     percent_historic <- round(100*current_mean_value/single_day_historical_stats$mean_today,2)
 
-    #GET name and number for df
-    station_numb <- unique(all_hydro_data_historical$STATION_NUMBER)
+    #GET name  df
     station_name <- hy_stations(station_numb)$STATION_NAME
     
     if (param_type == "Flow"){
@@ -90,11 +89,34 @@ create_hydro_stats <- function(all_hydro_data_historical, all_hydro_data_YOI, pa
       select(station_name, station_numb, parameter, current_mean, hist_mean, percent, MAD,  q25_today, q75_today, change_72hrs, trajectory )
     
 
+    table_message <- sprintf("%s stats were calculated using %s data", param_type, format(as.Date(df_Date), "%B, %d %Y"))
     
-    return(single_day_historical_stats_df)
+    return(list(single_day_historical_stats_df, table_message))
 
   }else{
-    stop(simpleError("Please input a new station or new YOI. The YOI you have chosen for this station does not exist."))
+    
+    
+    
+    
+    
+    single_day_historical_stats_df <- single_day_historical_stats %>%
+      mutate(MAD = mean_MAD, 
+             current_mean = current_mean_value, 
+             parameter = ifelse(param_type == "Flow", "Flow (m<sup>3</sup>/s)", "Level (m)"),
+             hist_mean = single_day_historical_stats$mean_today, 
+             percent = percent_historic, 
+             change_72hrs = current_mean_value - value_72hrs_ago, 
+             trajectory = ifelse(change_72hrs > 0, "Rising", 
+                                 ifelse(change_72hrs == 0, "Steady", "Falling")),
+             station_numb = station_numb, .before = "parameter", 
+             station_name = station_name)
+    
+    
+    single_day_historical_stats_df <- single_day_historical_stats_df %>%
+      select(station_name, station_numb, parameter, current_mean, hist_mean, percent, MAD,  q25_today, q75_today, change_72hrs, trajectory )
+    
+    
+    #stop(simpleError(sprintf("Please input a new station or new YOI. The YOI you have chosen for station %s does not exist.", station_numb)))
   }  
 }
 
@@ -118,15 +140,15 @@ create_stats_table <- function(all_hydro_data, YOI = 2024){
   
   #print("Filter for YOI")
   all_hydro_data_YOI <- all_hydro_data %>%
-  dplyr::filter(lubridate::year(Date) == YOI)
+    dplyr::filter(lubridate::year(Date) == YOI)
   
 
   flow_df <- create_hydro_stats(all_hydro_data_historical, all_hydro_data_YOI, param_type = "Flow")
   level_df <- create_hydro_stats(all_hydro_data_historical, all_hydro_data_YOI, param_type = "Level")
   
 
-  single_day_historical_stats_df <- flow_df %>%
-    full_join(level_df)
+  single_day_historical_stats_df <- flow_df[[1]] %>%
+    full_join(level_df[[1]])
   
 
     single_day_historical_stats_df <- single_day_historical_stats_df %>%
@@ -135,9 +157,8 @@ create_stats_table <- function(all_hydro_data, YOI = 2024){
       mutate_all(as.character())
     
 
-    return(single_day_historical_stats_df)
-    #print("Succesfully returned table")
-    
+    return(list(single_day_historical_stats_df, level_df[[2]], flow_df[[2]]))
+
 }
 
 
