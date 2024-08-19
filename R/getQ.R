@@ -69,7 +69,7 @@ create_hydro_stats <- function(all_hydro_data_historical, all_hydro_data_YOI, pa
   #  PERCENT HISTORIC PER DAY
   percent_historic <- round(100*current_mean_value/single_day_historical_stats$mean_today,2)
   
-  #GET name  df
+  #GET name df
   station_name <- hy_stations(station_numb)$STATION_NAME
   
   if (param_type == "Flow"){
