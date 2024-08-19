@@ -55,7 +55,7 @@ source("R/getQ.R")
 ```
 ## **Summary of water level, discharge and water level changes**
 
-##### Level data is pulled from historical and real-time hydrometric data published by Water Survey of Canada.
+##### Level and flow data are pulled from historical and real-time hydrometric data published by Water Survey of Canada.
 
 
 ---
@@ -154,9 +154,10 @@ walk(uniq_stns, function(st){
 
   stats_table <- stats_table_raw %>% select(-station_name)
   
+
   colnames(stats_table) <- c("Station Number", "Parameter", "Mean (Today)",
                              "Historical Mean (Today)", "Percent of Historical", "MAD",
-                             "Q25 (Today)", "Q75 (Today)",  "72 Hr Change", "Trajectory")
+                             "Q25 (Today)", "Q75 (Today)",  "72 Hr Change", "Date Ranges", "Trajectory")
   
 # Add formatting to Formatted Mean column which will eventually get changed to Historical Mean
   stats_table <- stats_table %>%
@@ -176,7 +177,7 @@ walk(uniq_stns, function(st){
                                   select(-`Mean (Today)`, `Q25 (Today)`, `Q75 (Today)`) %>%
                                   rename(`Mean (Today)` = `Formatted Mean (Today)`) %>%
                                    select("Station Number", "Parameter", "Mean (Today)", "Historical Mean (Today)",
-                                          "Percent of Historical", "MAD", "Q25 (Today)", "Q75 (Today)",  "72 Hr Change", "Trajectory"))
+                                          "Percent of Historical", "MAD", "Q25 (Today)", "Q75 (Today)",  "72 Hr Change",  "Date Ranges", "Trajectory"))
 
 
 # Convert to HTML and style the table
