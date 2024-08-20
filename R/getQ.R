@@ -53,8 +53,7 @@ create_hydro_stats <- function(all_hydro_data_historical, all_hydro_data_YOI, pa
     
   }
   
-  
-  
+
   
   if (nrow(all_hydro_data_historical) > 0){
     
@@ -108,7 +107,9 @@ create_hydro_stats <- function(all_hydro_data_historical, all_hydro_data_YOI, pa
              trajectory = as.character(ifelse(change_72hrs > 0, "Rising", 
                                               ifelse(change_72hrs == 0, "Steady", "Falling"))),
              date_ranges = date_ranges, 
-             station_numb = station_numb, .before = "parameter", 
+             station_numb = paste0('<a href="https://wateroffice.ec.gc.ca/report/real_time_e.html?stn=', 
+                                   station_numb, '" target="_blank">', 
+                                   station_numb, '</a>'),  
              station_name = station_name)
     
     
@@ -135,18 +136,13 @@ create_hydro_stats <- function(all_hydro_data_historical, all_hydro_data_YOI, pa
     
   }
 
- 
-  
-  
-  
   return(list(single_day_historical_stats_df, table_message))
-  
 
 
 }
 
 
-
+# function that rounds and trims to required sig figs
 round_and_format <- function(x, decimals = 3) {
   if (is.numeric(x)) {
     format(round(x, decimals), nsmall = decimals)
@@ -163,19 +159,18 @@ create_stats_table <- function(all_hydro_data, YOI = 2024){
   all_hydro_data_historical <- all_hydro_data %>%
     dplyr::filter(lubridate::year(Date) < YOI)
   
-  #print("Filter for YOI")
+  # Filter for YOI
   all_hydro_data_YOI <- all_hydro_data %>%
     dplyr::filter(lubridate::year(Date) == YOI)
-  
-  
 
   flow_df <- create_hydro_stats(all_hydro_data_historical, all_hydro_data_YOI, param_type = "Flow")
   level_df <- create_hydro_stats(all_hydro_data_historical, all_hydro_data_YOI, param_type = "Level")
   
-  
+  # round decimals for stage
   flow_df_stats <- flow_df[[1]] %>%
     mutate(across(where(is.numeric), ~ round_and_format(., decimals = 1))) 
   
+  # Round decimals for discharge
   level_df_stats <- level_df[[1]] %>%
     mutate(across(where(is.numeric), ~ round_and_format(., decimals = 3) )) 
   
