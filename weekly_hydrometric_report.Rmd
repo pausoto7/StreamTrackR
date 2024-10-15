@@ -74,14 +74,14 @@ definitions <- data.frame(
   
   Definition = c("WSC station number with a link to the WSC station website.", 
                  "Parameter type, either flow or water level.",
-                 "The average value of today's (or most recent date captured) measurements. Green symbology ndicates the value is between Q25-Q75. Red indicates the value is out of this range.",
+                 "The average value of today's (or most recent date captured) measurements. Green symbology indicates the value is between Q25-Q75. Red indicates the value is out of this range.",
                  "The average value of the measurements on this date over the historical period.",
                  "The percentage of today's value compared to the historical average.",
-                 "Mean Annual Discharge, a measure of the average amount of water flow through a river or stream over the course of a year.",
+                 "Mean Annual Discharge, a measure of the average amount of discharge through a river or stream over the course of a year.",
                  "The 25th percentile of today's data distribution, indicating that 25% of the data points are below this value.",
                  "The 75th percentile of today's data distribution, indicating that 75% of the data points are below this value.",
                  "The change in the measurement over the past 72 hours.",
-                 "The years during which the data was collected and used for analysis.",
+                 "The years during which the data was collected and included in analysis.",
                  "The trend or direction of the measurement over a three day period.")
 )
 
