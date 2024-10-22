@@ -2,9 +2,9 @@
 
 
 # Load necessary libraries
+library(shiny)
 library(rmarkdown)
 library(blastula)
-library(Microsoft365R)
 
 #set up------------------------------------------------
 
@@ -23,10 +23,10 @@ isolated_env <- new.env()
 file_name <- paste0("Yukon Condition Report ", Sys.Date(), ".html")
 
 #render rmarkdown -----------------------------------------------------
-rmarkdown::render("C:/Users/sotop/Documents/Technical Projects/2024/YukonWeeklyHydroReport/weekly_hydrometric_report.Rmd",
+rmarkdown::render("C:/Users/sotop/Documents/Technical Projects/2024/StreamTrackR/hydrometric_report.Rmd",
   output_file = file_name,
   params = list(stations =  c("09AG001", "09EA006", "09CA002", "09AE006", "09BC001", "09FD003", "09DD003",
-                              "09AC001",  "09CD001", "09AH001", "09EB001", "09AB001")  , 
+                              "09DD004", "09AC001",  "09CD001", "09AH001", "09EB001", "09AB001")  , 
                 YOI = 2024, 
                 location = "Yukon"), # To be used for title of report
   envir = isolated_env)
