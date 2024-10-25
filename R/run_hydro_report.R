@@ -8,12 +8,6 @@ library(blastula)
 
 #set up------------------------------------------------
 
-# Sys.setenv(RSTUDIO_PANDOC = "C:/Program Files/RStudio/resources/app/bin/quarto/bin/tools")
-# 
-# access_token <- ms_graph$new()
-# outlook_token <- my_graph$login()
-# outlook_token$save()
-
 
 #New environment for rmarkdown:render()
 isolated_env <- new.env()
@@ -30,6 +24,22 @@ rmarkdown::render("C:/Users/sotop/Documents/Technical Projects/2024/StreamTrackR
                 YOI = 2024, 
                 location = "Yukon"), # To be used for title of report
   envir = isolated_env)
+
+
+#---------------------------------------------------
+
+file_name <- paste0("Atmospheric River Conditions Report ", Sys.Date(), ".html")
+
+
+rmarkdown::render("C:/Users/sotop/Documents/Technical Projects/2024/StreamTrackR/hydrometric_report.Rmd",
+                  output_file = file_name,
+                  params = list(stations =  c("08GA030", "O8GA061", "08MH002", "08MH126")  ,
+                                YOI = 2024,
+                                location = "Lower Mainland Atmospheric River"), # To be used for title of report
+                  envir = isolated_env)
+
+
+
 
 # 
 # # Email content ----------------------------

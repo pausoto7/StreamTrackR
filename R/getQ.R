@@ -6,7 +6,10 @@
 
 create_hydro_stats <- function(all_hydro_data_historical, all_hydro_data_YOI, param_type, YOI = 2024){
   
+
   station_numb <- unique(all_hydro_data_historical$STATION_NUMBER)
+  
+  
   
   all_hydro_data_YOI <- all_hydro_data_YOI %>% dplyr::filter(Parameter == param_type)
   all_hydro_data_historical <- all_hydro_data_historical %>% dplyr::filter(Parameter == param_type)
