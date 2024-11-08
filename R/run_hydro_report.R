@@ -4,7 +4,7 @@
 # Load necessary libraries
 library(shiny)
 library(rmarkdown)
-library(blastula)
+#library(blastula)
 
 #set up------------------------------------------------
 
@@ -35,38 +35,8 @@ rmarkdown::render("C:/Users/sotop/Documents/Technical Projects/2024/StreamTrackR
                   output_file = file_name,
                   params = list(stations =  c("08GA030", "O8GA061", "08MH002", "08MH126")  ,
                                 YOI = 2024,
-                                location = "Lower Mainland Atmospheric River"), # To be used for title of report
+                                location = "Lower Mainland - Atmospheric River"), # To be used for title of report
                   envir = isolated_env)
-
-
-
-
-# 
-# # Email content ----------------------------
-# email_title <- sprintf("%s - Hydrometric Report", format(Sys.Date(), '%B %d, %Y'))
-# 
-# bl_body_raw <- paste("##", email_title,  "\n\n
-# Hello, \n\n
-# Please find the weekly hydrometric report attached.\n\n
-# Cheers,\n\n
-# RCOE")
-# 
-# 
-# # set up email and send ----------------------------------------------
-# 
-# outlb <- get_business_outlook()
-# 
-# bl_em <- compose_email(
-#   body=md(bl_body_raw),
-#   footer=md("Created by the DFO Restoration Centre of Expertise")
-# )
-# 
-# 
-# em <- outlb$create_email(bl_em, subject=email_title, to=c("paula.sooto@gmail.com", "paula.soto@dfo-mpo.gc.ca"))
-# 
-# # add an attachment and send it
-# em$add_attachment(file_name)
-# em$send()
 
 
 

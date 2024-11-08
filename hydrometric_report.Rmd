@@ -153,7 +153,7 @@ walk(uniq_stns, function(st){
   
   
   cat('\n\n<!-- -->\n\n')
-  cat(paste0("### ", unique(stats_table_raw$station_name), "\n\n"))
+  cat(paste0("### ", hy_stations(st)$STATION_NAME, "\n\n"))
   cat('\n\n<!-- -->\n\n')
 
   stats_table <- stats_table_raw %>% select(-station_name)

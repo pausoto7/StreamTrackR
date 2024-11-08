@@ -28,7 +28,9 @@ create_hydro_stats <- function(all_hydro_data_historical, all_hydro_data_YOI, pa
     table_message <- sprintf("%s stats were calculated using %s data", param_type, format(as.Date(df_Date), "%B %d, %Y"))
     
     
-  }else if (nrow(all_hydro_data_YOI) > 0 & !any(as.Date(all_hydro_data_YOI$Date) %in% Sys.Date())){
+    # Checks if all_hydro_data_YOI is not empty and has no records for today's date
+  }else if (nrow(all_hydro_data_YOI) > 0 & ncol(all_hydro_data_YOI) > 0 & !any(as.Date(all_hydro_data_YOI$Date) %in% Sys.Date())){
+    
     #Most up to date data in df
     df_Date <- as.Date(tail(all_hydro_data_YOI, 1)$Date)
     
@@ -171,11 +173,15 @@ create_stats_table <- function(all_hydro_data, YOI = 2024){
   
   # round decimals for stage
   flow_df_stats <- flow_df[[1]] %>%
-    mutate(across(where(is.numeric), ~ round_and_format(., decimals = 1))) 
+    mutate(across(where(is.numeric), ~ round_and_format(., decimals = 1))) %>%
+    mutate(MAD = as.character(MAD))
+  
   
   # Round decimals for discharge
   level_df_stats <- level_df[[1]] %>%
-    mutate(across(where(is.numeric), ~ round_and_format(., decimals = 3) )) 
+    mutate(across(where(is.numeric), ~ round_and_format(., decimals = 3) )) %>%
+    mutate(MAD = as.character(MAD))
+  
   
   
   single_day_historical_stats_df <- flow_df_stats %>%
