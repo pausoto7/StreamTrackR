@@ -207,12 +207,16 @@ walk(uniq_stns, function(st){
   
   # SET UP HYDROGRAPH ------------------------------------------------
 
-  if (nrow(sf_df_currentYr %>% dplyr::filter(Parameter == "Flow")) == 0){
+  #cat(nrow(sf_df_currentYr %>% dplyr::filter(Parameter == "Flow"))
+  #cat(nrow(st_df_past %>% dplyr::filter(Parameter != "Flow")) ))
+  
+  
+  if (nrow(sf_df_currentYr %>% dplyr::filter(Parameter == "Flow")) > 0 || nrow(st_df_past %>% dplyr::filter(Parameter == "Flow")) > 0 ){
     
 
     invisible(hydroGraphR::create_hydrograph_separate(all_hydro_sites_historical = st_df_past,
                                               all_hydro_sites_1yr = sf_df_currentYr, 
-                                              parameter = "level",
+                                              parameter = "flow",
                                               output_type = "print", 
                                               WY = "no"))
 
@@ -221,7 +225,7 @@ walk(uniq_stns, function(st){
     
       invisible(hydroGraphR::create_hydrograph_separate(all_hydro_sites_historical = st_df_past,
                                               all_hydro_sites_1yr = sf_df_currentYr, 
-                                              parameter = "flow",
+                                              parameter = "level",
                                               output_type = "print",
                                               WY = "no"))
 

@@ -1,11 +1,6 @@
 
 
 
-# Load necessary libraries
-library(shiny)
-library(rmarkdown)
-#library(blastula)
-
 #set up------------------------------------------------
 
 
@@ -38,6 +33,18 @@ rmarkdown::render("C:/Users/sotop/Documents/Technical Projects/2024/StreamTrackR
                                 location = "Lower Mainland - Atmospheric River"), # To be used for title of report
                   envir = isolated_env)
 
+
+#---------------------------------------------------
+
+file_name <- paste0("Tranquil ", Sys.Date(), ".html")
+
+
+rmarkdown::render("C:/Users/sotop/Documents/Technical Projects/2024/StreamTrackR/hydrometric_report.Rmd",
+                  output_file = file_name,
+                  params = list(stations =  c("08HB086", "08HC004")  ,
+                                YOI = 2024,
+                                location = "Tranquil"), # To be used for title of report
+                  envir = isolated_env)
 
 
 
