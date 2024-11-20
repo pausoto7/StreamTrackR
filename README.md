@@ -1,4 +1,4 @@
-# YukonWeeklyHydroReport
+# StreamTrackR
 
 
 
@@ -15,14 +15,14 @@ Already a pro? Just edit this README.md and make it your own. Want to make it ea
 
 ```
 cd existing_repo
-git remote add origin https://gccode.ssc-spc.gc.ca/rcoe-sar/yukonweeklyhydroreport.git
+git remote add origin  https://gccode.ssc-spc.gc.ca/rcoe-sar/StreamTrackR.git 
 git branch -M main
 git push -uf origin main
 ```
 
 ## Integrate with your tools
 
-- [ ] [Set up project integrations](https://gccode.ssc-spc.gc.ca/rcoe-sar/yukonweeklyhydroreport/-/settings/integrations)
+- [ ] [Set up project integrations]( https://gccode.ssc-spc.gc.ca/rcoe-sar/StreamTrackR.git/-/settings/integrations)
 
 ## Collaborate with your team
 
