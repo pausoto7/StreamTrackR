@@ -52,7 +52,7 @@ library(htmltools)
 library(knitr)
 library(htmlwidgets)
 
-source("R/getQ.R")
+source("R/utils.R")
 
 
 
