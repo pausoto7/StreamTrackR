@@ -49,5 +49,19 @@ rmarkdown::render("C:/Users/sotop/Documents/Technical Projects/2024/StreamTrackR
 
 
 
+#---------------------------------------------------
+
+file_name <- paste0("Theodosia Conditions Report ", Sys.Date(), ".html")
+
+
+rmarkdown::render("C:/Users/sotop/Documents/Technical Projects/2024/StreamTrackR/hydrometric_report.Rmd",
+                  output_file = file_name,
+                  params = list(stations =  c("08GC008", "08GC007", "08GC005", "08GC006")  ,
+                                YOI = 2024,
+                                location = "Theodosia"), # To be used for title of report
+                  envir = isolated_env)
+
+
+
 
 
