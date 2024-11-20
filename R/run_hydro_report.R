@@ -9,7 +9,7 @@ isolated_env <- new.env()
 
 
 #file name
-file_name <- paste0("Yukon Condition Report ", Sys.Date(), ".html")
+file_name <- paste0("Reports/Yukon Condition Report ", Sys.Date(), ".html")
 
 #render rmarkdown -----------------------------------------------------
 rmarkdown::render("C:/Users/sotop/Documents/Technical Projects/2024/StreamTrackR/hydrometric_report.Rmd",
@@ -23,7 +23,7 @@ rmarkdown::render("C:/Users/sotop/Documents/Technical Projects/2024/StreamTrackR
 
 #---------------------------------------------------
 
-file_name <- paste0("Atmospheric River Conditions Report ", Sys.Date(), ".html")
+file_name <- paste0("Reports/Atmospheric River Conditions Report ", Sys.Date(), ".html")
 
 
 rmarkdown::render("C:/Users/sotop/Documents/Technical Projects/2024/StreamTrackR/hydrometric_report.Rmd",
@@ -36,7 +36,7 @@ rmarkdown::render("C:/Users/sotop/Documents/Technical Projects/2024/StreamTrackR
 
 #---------------------------------------------------
 
-file_name <- paste0("Tranquil ", Sys.Date(), ".html")
+file_name <- paste0("Reports/Tranquil ", Sys.Date(), ".html")
 
 
 rmarkdown::render("C:/Users/sotop/Documents/Technical Projects/2024/StreamTrackR/hydrometric_report.Rmd",
@@ -51,7 +51,7 @@ rmarkdown::render("C:/Users/sotop/Documents/Technical Projects/2024/StreamTrackR
 
 #---------------------------------------------------
 
-file_name <- paste0("Theodosia Conditions Report ", Sys.Date(), ".html")
+file_name <- paste0("Reports/Theodosia Conditions Report ", Sys.Date(), ".html")
 
 
 rmarkdown::render("C:/Users/sotop/Documents/Technical Projects/2024/StreamTrackR/hydrometric_report.Rmd",
