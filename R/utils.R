@@ -62,7 +62,7 @@ create_hydro_stats <- function(all_hydro_data_historical, all_hydro_data_YOI, pa
   
   if (nrow(all_hydro_data_historical) > 0){
     
-    date_ranges <- get_date_ranges(all_hydro_data_historical)$year_ranges
+    date_ranges <- hydroGraphR::get_date_ranges(all_hydro_data_historical)$year_ranges
     
     
     # 72 HOUR CHANGE

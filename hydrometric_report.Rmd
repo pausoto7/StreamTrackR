@@ -66,24 +66,33 @@ source("R/utils.R")
 
 ```{r create def table, echo=FALSE, results='asis'}
 
-# Create a data frame with definitions
+# Define custom colors
+green_bg <- "#bef7a6"  # Light green background
+red_bg <- "#f7a6a6"    # Light red background
+
+
 definitions <- data.frame(
   Term = c("Station Number", "Parameter", "Mean (Today)",
            "Historical Mean (Today)", "Percent of Historical",
            "MAD", "Q25 (Today)", "Q75 (Today)", "72 Hr Change",
            "Date Ranges", "Trajectory"),
   
-  Definition = c("WSC station number with a link to the WSC station website.", 
-                 "Parameter type, either flow or water level.",
-                 "The average value of today's (or most recent date captured) measurements. Green symbology indicates the value is between Q25-Q75. Red indicates the value is out of this range.",
-                 "The average value of the measurements on this date over the historical period.",
-                 "The percentage of today's value compared to the historical average.",
-                 "Mean Annual Discharge, a measure of the average amount of discharge through a river or stream over the course of a year.",
-                 "The 25th percentile of today's data distribution, indicating that 25% of the data points are below this value.",
-                 "The 75th percentile of today's data distribution, indicating that 75% of the data points are below this value.",
-                 "The change in the measurement over the past 72 hours.",
-                 "The years during which the data was collected and included in analysis.",
-                 "The trend or direction of the measurement over a three day period.")
+  Definition = c(
+    "WSC station number with a link to the WSC station website.", 
+    "Parameter type, either flow or water level.",
+   paste(
+      "The average value of today's (or most recent date captured) measurements. ",
+      "<span style='background:", green_bg, ";'>Green</span> symbology indicates the value is between Q25-Q75. ",
+      "<span style='background:", red_bg, ";'>Red</span> indicates the value is out of this range."
+    ),    "The average value of the measurements on this date over the historical period.",
+    "The percentage of today's value compared to the historical average.",
+    "Mean Annual Discharge, a measure of the average amount of discharge through a river or stream over the course of a year.",
+    "The 25th percentile of today's data distribution, indicating that 25% of the data points are below this value.",
+    "The 75th percentile of today's data distribution, indicating that 75% of the data points are below this value.",
+    "The change in the measurement over the past 72 hours.",
+    "The years during which the data was collected and included in analysis.",
+    "The trend or direction of the measurement over a three day period."
+  )
 )
 
 # Create the kable table

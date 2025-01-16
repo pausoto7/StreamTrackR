@@ -1,93 +1,232 @@
-# StreamTrackR
+---
+title: "Generating Hydrometric Reports with StreamTrackR"
+output: 
+  html_document:
+    keep_md: yes
+---
+
+# **Overview**
+**Version:** 1.0.0  
+**Last Edited:** 2025-01-16   
+**Author:** Paula Soto    
+**Email:** paula.soto@dfo-mpo.gc.ca
+
+This vignette demonstrates how to use the `streamTrackR` project to generate hydrometric condition reports. The workflow utilizes an RMarkdown template and specified parameters to produce an HTML report.
+
+### Setup Instructions
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/yourusername/StreamTrackR.git
+   ```
+
+2. Install required R packages:
+   ```R
+   install.packages(c("ggplot2",  "formattable", "knitr", "kableExtra",
+                       "rmarkdown", "lubridate", "dplyr", "tidyr"))
+   ```
+
+3. Open the project in RStudio and open run_hydro_report.R to begin. 
 
 
 
-## Getting started
+# **Getting started**
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+## Setting Up 
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
+The first step is to download the required libraries and create an isolated environment for your script to run in.
 
-## Add your files
 
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/ee/gitlab-basics/add-file.html#add-a-file-using-the-command-line) or push an existing Git repository with the following command:
+``` r
+library(tidyhydat)
+library(hydroGraphR)
+library(dplyr)
 
+# Create a new environment for rendering 
+isolated_env <- new.env()
 ```
-cd existing_repo
-git remote add origin  https://gccode.ssc-spc.gc.ca/rcoe-sar/StreamTrackR.git 
-git branch -M main
-git push -uf origin main
+## Define the file name and output directory
+
+Next, define what the name of your file will be. In this example the report will be for conditions in the Yukon. Any information may be included here, but the file must end in ".html". 
+
+The following lines add a "Reports" folder into the project if one doesn't already exist. 
+
+
+``` r
+file_name <- paste0("Reports/Yukon Condition Report", Sys.Date(), ".html")
+
+# Add a "Reports" folder if it doesn't already exist
+if (!dir.exists("Reports")) 
+  { dir.create("Reports") }
+```
+## Rendering the Report
+
+The `rmarkdown::render` function is used to generate the report. The function takes the following parameters:
+
+- **stations**: A list of station IDs to include in the report.
+- **YOI**: The year of interest for the data.
+- **location**: The location used for the title of the report.
+- **WY**: Logical value indicating whether to present hydrograph by water year (Nov-Oct)(`TRUE`) or calendar year (Jan-Dec)(`FALSE`).
+
+
+``` r
+# Render the R Markdown report
+rmarkdown::render(
+  here::here("hydrometric_report.Rmd"),
+  output_file = file_name,
+  params = list(
+    stations = c(
+      "09AG001", "09EA006", "09CA002"
+    ),
+    YOI = 2025,
+    location = "Yukon", # To be used for the title of the report
+    WY  = FALSE
+  ),
+  envir = isolated_env
+)
 ```
 
-## Integrate with your tools
+## Viewing the Report
 
-- [ ] [Set up project integrations]( https://gccode.ssc-spc.gc.ca/rcoe-sar/StreamTrackR.git/-/settings/integrations)
+Once the rendering process is complete, the report will be saved in the `Reports` directory. Open the HTML file to view the results.
 
-## Collaborate with your team
+Note that all the figures produced in the report will also be present in the similarly named folder within the same `Reports` directory. 
 
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Set auto-merge](https://docs.gitlab.com/ee/user/project/merge_requests/merge_when_pipeline_succeeds.html)
+<br>
 
-## Test and Deploy
+# *Example Report Output:*
 
-Use the built-in continuous integration in GitLab.
 
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/index.html)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
 
-***
+<!-- -->
 
-# Editing this README
+<h1 style="font-size: 2.8em;">Yukon Hydrometric Conditions Report</h1> 
+<h2 style="font-size: 1.8em; color: #5b5b5b;">January 16, 2025</h2> 
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
+##### This report provides an overview of current hydrologic conditions at selected stations. Level and flow data are sourced from both historical and real-time hydrometric data published by Water Survey of Canada. See below table for terms and definitions used in station tables. 
 
-## Suggestions for a good README
 
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
 
-## Name
-Choose a self-explaining name for your project.
+<table class="table table-condensed" style="">
+ <thead>
+  <tr>
+   <th style="text-align:left;font-weight: bold;background-color: rgba(240, 240, 240, 255) !important;"> Term </th>
+   <th style="text-align:left;font-weight: bold;background-color: rgba(240, 240, 240, 255) !important;"> Definition </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:left;"> Station Number </td>
+   <td style="text-align:left;"> WSC station number with a link to the WSC station website. </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Parameter </td>
+   <td style="text-align:left;"> Parameter type, either flow or water level. </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Mean (Today) </td>
+   <td style="text-align:left;"> The average value of today's (or most recent date captured) measurements.  <span style="background: #bef7a6 ;">Green</span> symbology indicates the value is between Q25-Q75.  <span style="background: #f7a6a6 ;">Red</span> indicates the value is out of this range. </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Historical Mean (Today) </td>
+   <td style="text-align:left;"> The average value of the measurements on this date over the historical period. </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Percent of Historical </td>
+   <td style="text-align:left;"> The percentage of today's value compared to the historical average. </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> MAD </td>
+   <td style="text-align:left;"> Mean Annual Discharge, a measure of the average amount of discharge through a river or stream over the course of a year. </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Q25 (Today) </td>
+   <td style="text-align:left;"> The 25th percentile of today's data distribution, indicating that 25% of the data points are below this value. </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Q75 (Today) </td>
+   <td style="text-align:left;"> The 75th percentile of today's data distribution, indicating that 75% of the data points are below this value. </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> 72 Hr Change </td>
+   <td style="text-align:left;"> The change in the measurement over the past 72 hours. </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Date Ranges </td>
+   <td style="text-align:left;"> The years during which the data was collected and included in analysis. </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Trajectory </td>
+   <td style="text-align:left;"> The trend or direction of the measurement over a three day period. </td>
+  </tr>
+</tbody>
+</table>
 
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
 
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
 
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
 
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+<!-- -->
 
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+### BIG SALMON RIVER NEAR CARMACKS
 
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
 
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
 
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
+<!-- -->
 
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
+<table class="table" style="margin-left: auto; margin-right: auto;border-bottom: 0;">
+ <thead>
+  <tr>
+   <th style="text-align:center;color: white !important;background-color: rgba(0, 151, 169, 255) !important;"> Station Number </th>
+   <th style="text-align:center;color: white !important;background-color: rgba(0, 151, 169, 255) !important;"> Parameter </th>
+   <th style="text-align:center;color: white !important;background-color: rgba(0, 151, 169, 255) !important;"> Mean (Today) </th>
+   <th style="text-align:center;color: white !important;background-color: rgba(0, 151, 169, 255) !important;"> Historical Mean (Today) </th>
+   <th style="text-align:center;color: white !important;background-color: rgba(0, 151, 169, 255) !important;"> Percent of Historical </th>
+   <th style="text-align:center;color: white !important;background-color: rgba(0, 151, 169, 255) !important;"> MAD </th>
+   <th style="text-align:center;color: white !important;background-color: rgba(0, 151, 169, 255) !important;"> Q25 (Today) </th>
+   <th style="text-align:center;color: white !important;background-color: rgba(0, 151, 169, 255) !important;"> Q75 (Today) </th>
+   <th style="text-align:center;color: white !important;background-color: rgba(0, 151, 169, 255) !important;"> 72 Hr Change </th>
+   <th style="text-align:center;color: white !important;background-color: rgba(0, 151, 169, 255) !important;"> Date Ranges </th>
+   <th style="text-align:center;color: white !important;background-color: rgba(0, 151, 169, 255) !important;"> Trajectory </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:center;"> <a href="https://wateroffice.ec.gc.ca/report/real_time_e.html?stn=09AG001" target="_blank">09AG001</a> </td>
+   <td style="text-align:center;"> Flow (m<sup>3</sup>/s) </td>
+   <td style="text-align:center;"> <span style="background: #bef7a6">56.4</span> </td>
+   <td style="text-align:center;"> 62.1 </td>
+   <td style="text-align:center;"> 91 </td>
+   <td style="text-align:center;"> 69.9 </td>
+   <td style="text-align:center;"> 45.3 </td>
+   <td style="text-align:center;"> 73.9 </td>
+   <td style="text-align:center;"> -5.6 </td>
+   <td style="text-align:center;"> 1953-1958, 1962-1996, 2016-2024 </td>
+   <td style="text-align:center;"> Falling </td>
+  </tr>
+  <tr>
+   <td style="text-align:center;"> <a href="https://wateroffice.ec.gc.ca/report/real_time_e.html?stn=09AG001" target="_blank">09AG001</a> </td>
+   <td style="text-align:center;"> Level (m) </td>
+   <td style="text-align:center;"> <span style="background: #bef7a6">1.694</span> </td>
+   <td style="text-align:center;"> 1.649 </td>
+   <td style="text-align:center;"> 103 </td>
+   <td style="text-align:center;"> NA </td>
+   <td style="text-align:center;"> 1.480 </td>
+   <td style="text-align:center;"> 1.810 </td>
+   <td style="text-align:center;"> -0.072 </td>
+   <td style="text-align:center;"> 2016-2025 </td>
+   <td style="text-align:center;"> Falling </td>
+  </tr>
+</tbody>
+<tfoot><tr><td style="padding: 0; " colspan="100%">
+<sup></sup> Note:<br> Flow stats were calculated using October 18, 2024 data <br>    Level stats were calculated using December 31, 2024 data</td></tr></tfoot>
+</table>
 
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
+<br><img src="README_files/figure-html/example-1.png" width="100%" />
+  
 
-## License
-For open source projects, say how it is licensed.
+# Conclusion
 
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+This vignette has demonstrated how to use the `streamTrackR` project to generate a custom hydrometric report. Modify the parameters as needed to customize the stations, year of interest, and location for your specific requirements.
+
+<br>
+

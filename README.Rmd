@@ -1,0 +1,264 @@
+---
+title: "Generating Hydrometric Reports with StreamTrackR"
+output: 
+  html_document:
+    keep_md: yes
+---
+
+# **Overview**
+**Version:** 1.0.0  
+**Last Edited:** `r Sys.Date()`   
+**Author:** Paula Soto    
+**Email:** paula.soto@dfo-mpo.gc.ca
+
+This vignette demonstrates how to use the `streamTrackR` project to generate hydrometric condition reports. The workflow utilizes an RMarkdown template and specified parameters to produce an HTML report.
+
+### Setup Instructions
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/yourusername/StreamTrackR.git
+   ```
+
+2. Install required R packages:
+   ```R
+   install.packages(c("ggplot2",  "formattable", "knitr", "kableExtra",
+                       "rmarkdown", "lubridate", "dplyr", "tidyr"))
+   ```
+
+3. Open the project in RStudio and open run_hydro_report.R to begin. 
+
+
+
+# **Getting started**
+
+## Setting Up 
+
+The first step is to download the required libraries and create an isolated environment for your script to run in.
+
+```{r createenv, results = 'hide', warning=FALSE, message=FALSE}
+
+library(tidyhydat)
+library(hydroGraphR)
+library(dplyr)
+
+# Create a new environment for rendering 
+isolated_env <- new.env()
+
+```
+## Define the file name and output directory
+
+Next, define what the name of your file will be. In this example the report will be for conditions in the Yukon. Any information may be included here, but the file must end in ".html". 
+
+The following lines add a "Reports" folder into the project if one doesn't already exist. 
+
+```{r filename, results = 'hide', warning=FALSE, message=FALSE}
+
+file_name <- paste0("Reports/Yukon Condition Report", Sys.Date(), ".html")
+
+# Add a "Reports" folder if it doesn't already exist
+if (!dir.exists("Reports")) 
+  { dir.create("Reports") }
+
+```
+## Rendering the Report
+
+The `rmarkdown::render` function is used to generate the report. The function takes the following parameters:
+
+- **stations**: A list of station IDs to include in the report.
+- **YOI**: The year of interest for the data.
+- **location**: The location used for the title of the report.
+- **WY**: Logical value indicating whether to present hydrograph by water year (Nov-Oct)(`TRUE`) or calendar year (Jan-Dec)(`FALSE`).
+
+```{r rmd, eval = FALSE}
+# Render the R Markdown report
+rmarkdown::render(
+  here::here("hydrometric_report.Rmd"),
+  output_file = file_name,
+  params = list(
+    stations = c(
+      "09AG001", "09EA006", "09CA002"
+    ),
+    YOI = 2025,
+    location = "Yukon", # To be used for the title of the report
+    WY  = FALSE
+  ),
+  envir = isolated_env
+)
+```
+
+## Viewing the Report
+
+Once the rendering process is complete, the report will be saved in the `Reports` directory. Open the HTML file to view the results.
+
+Note that all the figures produced in the report will also be present in the similarly named folder within the same `Reports` directory. 
+
+<br>
+
+# *Example Report Output:*
+
+
+```{r report title, results='asis', include=TRUE, echo=FALSE}
+ cat('\n\n<!-- -->\n\n')
+
+# Create the dynamic title and date
+report_title <- sprintf('<h1 style="font-size: 2.8em;">%s Hydrometric Conditions Report</h1>', "Yukon")
+system_date <- sprintf('<h2 style="font-size: 1.8em; color: #5b5b5b;">%s</h2>', format(Sys.Date(), '%B %d, %Y'))
+
+# Print the title and date
+cat(report_title, "\n")
+cat(system_date, "\n")
+```
+
+##### This report provides an overview of current hydrologic conditions at selected stations. Level and flow data are sourced from both historical and real-time hydrometric data published by Water Survey of Canada. See below table for terms and definitions used in station tables. 
+
+
+
+```{r createDefTable, echo=FALSE, results='asis'}
+
+
+# Define custom colors
+green_bg <- "#bef7a6"  # Light green background
+red_bg <- "#f7a6a6"    # Light red background
+
+
+definitions <- data.frame(
+  Term = c("Station Number", "Parameter", "Mean (Today)",
+           "Historical Mean (Today)", "Percent of Historical",
+           "MAD", "Q25 (Today)", "Q75 (Today)", "72 Hr Change",
+           "Date Ranges", "Trajectory"),
+  
+  Definition = c(
+    "WSC station number with a link to the WSC station website.", 
+    "Parameter type, either flow or water level.",
+   paste(
+      "The average value of today's (or most recent date captured) measurements. ",
+      "<span style='background:", green_bg, ";'>Green</span> symbology indicates the value is between Q25-Q75. ",
+      "<span style='background:", red_bg, ";'>Red</span> indicates the value is out of this range."
+    ),    "The average value of the measurements on this date over the historical period.",
+    "The percentage of today's value compared to the historical average.",
+    "Mean Annual Discharge, a measure of the average amount of discharge through a river or stream over the course of a year.",
+    "The 25th percentile of today's data distribution, indicating that 25% of the data points are below this value.",
+    "The 75th percentile of today's data distribution, indicating that 75% of the data points are below this value.",
+    "The change in the measurement over the past 72 hours.",
+    "The years during which the data was collected and included in analysis.",
+    "The trend or direction of the measurement over a three day period."
+  )
+)
+
+# Create the kable table
+knitr::kable(definitions, "html", escape = FALSE, col.names = c("Term", "Definition")) %>%
+  kableExtra::kable_styling(full_width = TRUE, position = "left", bootstrap_options = "condensed") %>%
+  kableExtra::row_spec(0, bold = TRUE, background = "#f0f0f0")
+
+  #cat("<br>") # Adds extra space
+
+```
+
+```{r stations data, include = FALSE,  results='asis'}
+
+# gradient_color -----------------------------------
+
+format_color <- function(x) {
+  ifelse(x < 80, formattable::color_tile("red", "#FFFFEE")(x), color_tile("#EEFFEF", "olivedrab")(x))
+}
+
+# ---------------------------------------------------
+
+
+format_mean <- function(x, Q25, Q75) {
+  formattable::formatter("span", style = ~ formattable::style(
+    background = ifelse(x >= Q25 & x <= Q75, "#bef7a6", "#f7a6a6")
+  ))(x)
+}
+
+
+```
+
+
+```{r example, echo=FALSE, results='asis',  out.width='100%', fig.height = 4, message = FALSE, warning = FALSE}
+
+all_stations_data <- hydroGraphR::dl_hydro("09AG001")
+
+st <- "09AG001"
+YOI <- 2024 
+WY <- TRUE
+source("R/utils.R")
+
+max_date <-as.Date(paste(as.character(YOI-1), "12", "31", sep = "-"))
+
+stats_table_info<- create_stats_table(all_stations_data, YOI = YOI)
+  
+stats_table_raw <- stats_table_info[[1]]
+  
+cat('\n\n<!-- -->\n\n')
+cat(paste0("### ", hy_stations(st)$STATION_NAME, "\n\n"))
+cat('\n\n<!-- -->\n\n')
+
+stats_table <- stats_table_raw %>% select(-station_name)
+  
+
+colnames(stats_table) <- c("Station Number", "Parameter", "Mean (Today)",
+                             "Historical Mean (Today)", "Percent of Historical", "MAD",
+                             "Q25 (Today)", "Q75 (Today)",  "72 Hr Change", "Date Ranges", "Trajectory")
+  
+# Add formatting to Formatted Mean column which will eventually get changed to Historical Mean
+  stats_table <- stats_table %>%
+    rowwise() %>%
+    mutate(`Formatted Mean (Today)` = list(format_mean(`Mean (Today)`,
+                                                     `Q25 (Today)`,
+                                                     `Q75 (Today)`)))
+
+# Unnest the formatted column for correct display
+  stats_table <- stats_table %>% 
+    ungroup() %>%
+    mutate(`Formatted Mean (Today)` = sapply(`Formatted Mean (Today)`, as.character))
+
+
+#  save formattable table to be printed
+  formattable_table <- formattable::formattable(stats_table %>% 
+                                  select(-`Mean (Today)`, `Q25 (Today)`, `Q75 (Today)`) %>%
+                                  rename(`Mean (Today)` = `Formatted Mean (Today)`) %>%
+                                   select("Station Number", "Parameter", "Mean (Today)", "Historical Mean (Today)",
+                                          "Percent of Historical", "MAD", "Q25 (Today)", "Q75 (Today)",  "72 Hr Change",  "Date Ranges", "Trajectory"))
+
+
+# Convert to HTML and style the table
+  html_table <- knitr::kable(formattable_table,
+                           "html",
+                           escape = FALSE, 
+                           align = "c") %>%
+  kableExtra::kable_styling(full_width = TRUE) %>%
+  kableExtra::footnote(general_title = "", 
+                       general = paste("Note:\n", stats_table_info[2], "\n   ", stats_table_info[3])) %>%
+  kableExtra::row_spec(row = 0, color = "white", background = "#0097A9") 
+
+  cat(knitr::knit_print(html_table))
+  
+
+  cat("<br>") # Adds extra space
+
+
+  # gets stats for flow and WL separately 
+  st_df_past <- create_hydro_stats_historical(all_stations_data, date_minimum = NA, date_maximum = max_date)
+  sf_df_currentYr <- create_hydro_stats_singleYr(all_stations_data, YOI, WY = WY)
+
+  
+  # SET UP HYDROGRAPH ------------------------------------------------
+
+    invisible(hydroGraphR::create_hydrograph_separate(all_hydro_sites_historical = st_df_past,
+                                              all_hydro_sites_1yr = sf_df_currentYr, 
+                                              parameter = "flow",
+                                              output_type = "print", 
+                                              WY = WY))
+
+    
+  
+```
+  
+
+# Conclusion
+
+This vignette has demonstrated how to use the `streamTrackR` project to generate a custom hydrometric report. Modify the parameters as needed to customize the stations, year of interest, and location for your specific requirements.
+
+<br>
+
