@@ -8,6 +8,7 @@ params:
   stations: NULL
   YOI: NULL
   location: NULL
+  WY: FALSE
 ---
 
 
@@ -95,6 +96,10 @@ kable(definitions, "html", escape = FALSE, col.names = c("Term", "Definition")) 
 ```
 
 ---
+
+**Note:** The figures and analyses in this report are based on water level and discharge data.  
+Please be aware that the most recent two years of data are typically provisional and may be subject to revision.  
+This should be considered when interpreting historic and recent YOI traces.
 
 ```{r read data, include=FALSE}
 
@@ -202,7 +207,7 @@ walk(uniq_stns, function(st){
 
   # gets stats for flow and WL separately 
   st_df_past <- create_hydro_stats_historical(st_df, date_minimum = NA, date_maximum = max_date)
-  sf_df_currentYr <- create_hydro_stats_singleYr(st_df, params$YOI, WY = "no")
+  sf_df_currentYr <- create_hydro_stats_singleYr(st_df, params$YOI, WY = params$WY)
 
   
   # SET UP HYDROGRAPH ------------------------------------------------
@@ -218,7 +223,7 @@ walk(uniq_stns, function(st){
                                               all_hydro_sites_1yr = sf_df_currentYr, 
                                               parameter = "flow",
                                               output_type = "print", 
-                                              WY = "no"))
+                                              WY = params$WY))
 
     
   }else{
@@ -227,7 +232,7 @@ walk(uniq_stns, function(st){
                                               all_hydro_sites_1yr = sf_df_currentYr, 
                                               parameter = "level",
                                               output_type = "print",
-                                              WY = "no"))
+                                              WY = params$WY))
 
   }
   

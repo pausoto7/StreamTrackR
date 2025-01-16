@@ -174,13 +174,15 @@ create_stats_table <- function(all_hydro_data, YOI = 2024){
   # round decimals for stage
   flow_df_stats <- flow_df[[1]] %>%
     mutate(across(where(is.numeric), ~ round_and_format(., decimals = 1))) %>%
-    mutate(MAD = as.character(MAD))
+    mutate(MAD = as.character(MAD), 
+           current_mean = as.numeric(current_mean))
   
   
   # Round decimals for discharge
   level_df_stats <- level_df[[1]] %>%
     mutate(across(where(is.numeric), ~ round_and_format(., decimals = 3) )) %>%
-    mutate(MAD = as.character(MAD))
+    mutate(MAD = as.character(MAD), 
+           current_mean = as.numeric(current_mean))
   
   
   

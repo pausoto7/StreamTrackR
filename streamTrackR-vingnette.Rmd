@@ -1,0 +1,106 @@
+---
+title: "Generating Hydrometric Reports with streamTrackR"
+author: "Your Name"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Generating Hydrometric Reports with streamTrackR}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+# Overview
+
+This vignette demonstrates how to use the `streamTrackR` project to generate hydrometric condition reports. The workflow utilizes an RMarkdown template, specified parameters, and `rmarkdown::render()` to produce an HTML report.
+
+# Setting Up the Environment
+
+The first step is to create an isolated environment and define the output directory for your reports.
+
+```{r createenv}
+
+library(tidyhydat)
+library(dplyr)
+
+# Create a new environment for rendering 
+isolated_env <- new.env()
+
+```
+# Define the file name and output directory
+
+```{r filename}
+
+file_name <- paste0("Reports/Yukon Condition Report", Sys.Date(), ".html")
+
+# Add a "Reports" folder if it doesn't already exist
+if (!dir.exists("Reports")) 
+  { dir.create("Reports") }
+
+```
+# Rendering the Report
+
+The `rmarkdown::render` function is used to generate the report. The function takes the following parameters:
+
+- **stations**: A vector of station IDs to include in the report.
+- **YOI**: The year of interest for the data.
+- **location**: The title location for the report.
+- **location**: Logical value indicating whether to present hydrograph by water year (`TRUE`) or calendar year (`FALSE`).
+
+```{r rmd, eval = FALSE}
+# Render the R Markdown report
+rmarkdown::render(
+  here::here("hydrometric_report.Rmd"),
+  output_file = file_name,
+  params = list(
+    stations = c(
+      "09AG001", "09EA006", "09CA002"
+    ),
+    YOI = 2025,
+    location = "Yukon", # To be used for the title of the report
+    WY  = FALSE
+  ),
+  envir = isolated_env
+)
+```
+
+# Viewing the Report
+
+Once the rendering process is complete, the report will be saved in the `Reports` directory. Open the HTML file in your web browser to view the results.
+
+Report includes below data and hydrographs for selected stations. 
+
+
+```{r createDefTable, echo=FALSE, results='asis'}
+
+# Create a data frame with definitions
+definitions <- data.frame(
+  Term = c("Station Number", "Parameter", "Mean (Today)",
+           "Historical Mean (Today)", "Percent of Historical",
+           "MAD", "Q25 (Today)", "Q75 (Today)", "72 Hr Change",
+           "Date Ranges", "Trajectory"),
+  
+  Definition = c("WSC station number with a link to the WSC station website.", 
+                 "Parameter type, either flow or water level.",
+                 "The average value of today's (or most recent date captured) measurements. Green symbology indicates the value is between Q25-Q75. Red indicates the value is out of this range.",
+                 "The average value of the measurements on this date over the historical period.",
+                 "The percentage of today's value compared to the historical average.",
+                 "Mean Annual Discharge, a measure of the average amount of discharge through a river or stream over the course of a year.",
+                 "The 25th percentile of today's data distribution, indicating that 25% of the data points are below this value.",
+                 "The 75th percentile of today's data distribution, indicating that 75% of the data points are below this value.",
+                 "The change in the measurement over the past 72 hours.",
+                 "The years during which the data was collected and included in analysis.",
+                 "The trend or direction of the measurement over a three day period.")
+)
+
+# Create the kable table
+knitr::kable(definitions, "html", escape = FALSE, col.names = c("Term", "Definition")) %>%
+  kableExtra::kable_styling(full_width = TRUE, position = "left", bootstrap_options = "condensed") %>%
+  kableExtra::row_spec(0, bold = TRUE, background = "#f0f0f0")
+
+  #cat("<br>") # Adds extra space
+
+```
+
+# Conclusion
+
+This vignette has demonstrated how to use the `streamTrackR` project to generate a custom hydrometric report. Modify the parameters as needed to customize the stations, year of interest, and location for your specific requirements.
