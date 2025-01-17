@@ -28,7 +28,6 @@ This vignette demonstrates how to use the `streamTrackR` project to generate hyd
 3. Open the project in RStudio and open run_hydro_report.R to begin. 
 
 
-
 # **Getting started**
 
 ## Setting Up 
