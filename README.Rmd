@@ -1,8 +1,8 @@
 ---
 title: "Generating Hydrometric Reports with StreamTrackR"
 output: 
-  html_document:
-    keep_md: yes
+  github_document:
+    html_preview: true
 ---
 
 # **Overview**
