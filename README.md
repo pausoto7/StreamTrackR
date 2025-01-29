@@ -4,30 +4,45 @@ Generating Hydrometric Reports with StreamTrackR
 # **Overview**
 
 **Version:** 1.0.0  
-**Last Edited:** 2025-01-17  
+**Last Edited:** 2025-01-29  
 **Author:** Paula Soto  
 **Email:** <paula.soto@dfo-mpo.gc.ca>
 
 This vignette demonstrates how to use the `streamTrackR` project to
 generate hydrometric condition reports. The workflow utilizes an
-RMarkdown template and specified parameters to produce an HTML report.
+RMarkdown template and specified parameters to produce an HTML report
+using Water Survey of Canada (WSC) station data.
 
 ### Setup Instructions
 
-1.  Clone the repository:
+1.  Clone the project from the repository using your preferred method.
+    Below is one example of how to do it in the R Studio terminal:
 
-    ``` bash
-    git clone https://github.com/yourusername/StreamTrackR.git
-    ```
+``` bash
+git clone https://github.com/pausoto7/StreamTrackR.git
+```
 
-2.  Install required R packages:
+2.  Install required R packages
 
-    ``` r
-    install.packages(c("ggplot2",  "formattable", "knitr", "kableExtra",
-                        "rmarkdown", "lubridate", "dplyr", "tidyr"))
-    ```
+Install `hydroGraphR` from GitHub. `hydroGraphR` is an R package
+designed to simplify the process of creating hydrographs.
 
-3.  Open the project in RStudio and open run_hydro_report.R to begin.
+``` r
+# Install devtools if not already installed
+install.packages("devtools")
+
+# Install hydroGraphR
+devtools::install_github("pausoto7/hydroGraphR")
+```
+
+Install the rest of the required R packages from CRAN:
+
+``` r
+install.packages(c("ggplot2",  "formattable", "knitr", "kableExtra",
+                       "rmarkdown", "lubridate", "dplyr", "tidyr"))
+```
+
+3.  Open the project in RStudio and open `run_hydro_report.R` to begin.
 
 # **Getting started**
 
@@ -38,7 +53,7 @@ isolated environment for your script to run in.
 
 ``` r
 library(tidyhydat)
-library(hydroGraphR)
+library(hydroGraphR) 
 library(dplyr)
 
 # Create a new environment for rendering 
@@ -49,7 +64,11 @@ isolated_env <- new.env()
 
 Next, define what the name of your file will be. In this example the
 report will be for conditions in the Yukon. Any information may be
-included here, but the file must end in “.html”.
+included here, but the file must end in “.html”. In this example
+information on the location of the report is included along with the
+date it is run (today). Other information that could be helpful to
+include would be whether the report will be output in calendar or water
+year format.
 
 The following lines add a “Reports” folder into the project if one
 doesn’t already exist.
@@ -67,9 +86,11 @@ if (!dir.exists("Reports"))
 The `rmarkdown::render` function is used to generate the report. The
 function takes the following parameters:
 
-- **stations**: A list of station IDs to include in the report.
+- **Stations**: A list of WSC station IDs for stations that should be
+  include in the report. Station ID’s can be found on the [WSC
+  website](https://wateroffice.ec.gc.ca/search/real_time_e.html).
 - **YOI**: The year of interest for the data.
-- **location**: The location used for the title of the report.
+- **Location**: The location used for the title of the report.
 - **WY**: Logical value indicating whether to present hydrograph by
   water year (Nov-Oct)(`TRUE`) or calendar year (Jan-Dec)(`FALSE`).
 
@@ -107,7 +128,7 @@ the similarly named folder within the same `Reports` directory.
 Yukon Hydrometric Conditions Report
 </h1>
 <h2 style="font-size: 1.8em; color: #5b5b5b;">
-January 17, 2025
+January 29, 2025
 </h2>
 
 ##### This report provides an overview of current hydrologic conditions at selected stations. Level and flow data are sourced from both historical and real-time hydrometric data published by Water Survey of Canada. See below table for terms and definitions used in station tables.
@@ -274,16 +295,16 @@ Trajectory
 Flow (m<sup>3</sup>/s)
 </td>
 <td style="text-align:center;">
-<span style="background: #bef7a6">56.4</span>
+<span style="background: #bef7a6">56.1</span>
 </td>
 <td style="text-align:center;">
 62.1
 </td>
 <td style="text-align:center;">
-91
+90
 </td>
 <td style="text-align:center;">
-69.9
+69.7
 </td>
 <td style="text-align:center;">
 45.3
@@ -309,7 +330,7 @@ Falling
 Level (m)
 </td>
 <td style="text-align:center;">
-<span style="background: #bef7a6">1.694</span>
+<span style="background: #bef7a6">1.692</span>
 </td>
 <td style="text-align:center;">
 1.649
@@ -355,5 +376,13 @@ This vignette has demonstrated how to use the `streamTrackR` project to
 generate a custom hydrometric report. Modify the parameters as needed to
 customize the stations, year of interest, and location for your specific
 requirements.
+
+<br>
+
+### To modify this project
+
+If you’d like to modify this project, please **fork** it and make
+changes in your own version. If you have improvements, feel free to
+submit a **pull request**!
 
 <br>
