@@ -18,24 +18,13 @@ The report is designed to facilitate quick comparisons between stations while in
 
 This vignette outlines the process for generating hydrometric condition reports. Using an RMarkdown template and user-defined parameters, the workflow produces an HTML report based on WSC station data.
 
-### Setup Instructions
+### Project Download & Setup Instructions
 
-1. Clone the project from the repository using your preferred method. One way to do this is to:
+1. Clone the project from the GitHub repository using your preferred method. 
 
-   1. Open the [project on git](https://github.com/pausoto7/StreamTrackR.git)
+- One way to do this is to follow the steps found [here](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository). Repository path is [here](https://github.com/pausoto7/StreamTrackR.git).
   
-   2. Click on the green `<> Code` icon  
-   
-   3. Copy the HTTPS cloning link  
-   
-   4. Open RStudio  
-   
-   5. Click on **File** in the top left corner and select **New Project**  
-   
-   6. Click on **Version Control → Git**, and then paste the Repository URL.  
-   
-   7. Name the project appropriately and then click **Create Project**  
-   
+
 
 2. Install required R packages
 
@@ -104,11 +93,9 @@ location_name <- "Yukon"
 # FILE NAME
 file_name <- sprintf("Reports/%s Condition Report %s.html", location_name, Sys.Date())
 
-
 # STATION NAMES
 station_IDs <- c("09AG001", "09EA006", "09CA002", "09AE006", "09BC001", "09FD003", "09DD003",
 "09DD004", "09AC001",  "09CD001", "09AH001", "09EB001", "09AB001")
-
 
 # YOI
 YOI <- 2025

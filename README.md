@@ -4,7 +4,7 @@ Generating Hydrometric Reports with StreamTrackR
 # **Overview**
 
 **Version:** 1.0.0  
-**Last Edited:** 2025-03-05  
+**Last Edited:** 2025-03-06  
 **Author:** Paula Soto  
 **Email:** <paula.soto@dfo-mpo.gc.ca>
 
@@ -21,27 +21,15 @@ This vignette outlines the process for generating hydrometric condition
 reports. Using an RMarkdown template and user-defined parameters, the
 workflow produces an HTML report based on WSC station data.
 
-### Setup Instructions
+### Project Download & Setup Instructions
 
-1.  Clone the project from the repository using your preferred method.
-    One way to do this is to:
+1.  Clone the project from the GitHub repository using your preferred
+    method.
 
-    1.  Open the [project on
-        git](https://github.com/pausoto7/StreamTrackR.git)
-
-    2.  Click on the green `<> Code` icon
-
-    3.  Copy the HTTPS cloning link
-
-    4.  Open RStudio
-
-    5.  Click on **File** in the top left corner and select **New
-        Project**
-
-    6.  Click on **Version Control → Git**, and then paste the
-        Repository URL.
-
-    7.  Name the project appropriately and then click **Create Project**
+- One way to do this is to follow the steps found
+  [here](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository).
+  Repository path is
+  [here](https://github.com/pausoto7/StreamTrackR.git).
 
 2.  Install required R packages
 
@@ -74,7 +62,7 @@ install.packages(c("ggplot2",  "formattable", "knitr", "kableExtra",
 
 The first step is to download the required libraries and create an
 isolated environment for your script to run in.The rest of the libraries
-are run within the rmarkdown script which is why they’re not shown
+are run within the rmarkdown script which is why they’re not loaded
 below.
 
 ``` r
@@ -84,6 +72,7 @@ library(tidyverse)
 #New environment for rmarkdown:render()
 isolated_env <- new.env()
 
+# if Reports folder doesn't already exist, then this creates one
 if (!dir.exists("Reports")){
   dir.create("Reports")
 }
@@ -93,16 +82,17 @@ if (!dir.exists("Reports")){
 
 Before generating the report, key parameters must be defined to specify
 the location, stations, time period, and formatting preferences. These
-parameters ensure that the report is both descriptive and relevant to
-the analysis being conducted.
+parameters ensure that the report and report name are both descriptive
+and relevant to the analysis being conducted.
 
 - **location_name**: this variable specifies the geographic area for the
   report. This name will be used in both the report title and file name.
-- **file_name** The file_name variable is constructed dynamically using
-  `sprintf()`, incorporating the location name and the date the report
-  is run (`Sys.Date()`). The report is saved in the “Reports/” directory
-  to keep outputs organized.
-- **Stations**: A list of WSC station IDs for stations that should be
+- **file_name** This determines the reports file name. It is constructed
+  dynamically using `sprintf()`, incorporating the location name, the
+  date the report is run (`Sys.Date()`), and any other specified info.
+  The report should be saved in the “Reports/” directory to keep outputs
+  organized.
+- **station_IDs**: A list of WSC station IDs for stations that should be
   include in the report. Station ID’s can be found on the [WSC
   website](https://wateroffice.ec.gc.ca/search/real_time_e.html).
 - **YOI**: The year of interest for the data.
@@ -118,11 +108,9 @@ location_name <- "Yukon"
 # FILE NAME
 file_name <- sprintf("Reports/%s Condition Report %s.html", location_name, Sys.Date())
 
-
 # STATION NAMES
-stations_to_run <- c("09AG001", "09EA006", "09CA002", "09AE006", "09BC001", "09FD003", "09DD003",
+station_IDs <- c("09AG001", "09EA006", "09CA002", "09AE006", "09BC001", "09FD003", "09DD003",
 "09DD004", "09AC001",  "09CD001", "09AH001", "09EB001", "09AB001")
-
 
 # YOI
 YOI <- 2025
@@ -133,8 +121,8 @@ WY_type <- TRUE
 
 ## Rendering the Report
 
-The `rmarkdown::render` function is used to generate the report. The
-function takes the following parameters:
+The `rmarkdown::render` function is used to generate the report with the
+parameters specified above.
 
 ``` r
 # Render the R Markdown report
@@ -154,7 +142,7 @@ Once the rendering process is complete, the report will be saved in the
 `Reports` directory. Open the HTML file to view the results.
 
 Note that all the figures produced in the report will also be present in
-the similarly named folder within the same `Reports` directory.
+the corresponding folder within the same `Reports` directory.
 
 <br>
 
@@ -165,7 +153,7 @@ the similarly named folder within the same `Reports` directory.
 Yukon Hydrometric Conditions Report
 </h1>
 <h2 style="font-size: 1.8em; color: #5b5b5b;">
-March 05, 2025
+March 06, 2025
 </h2>
 
 ##### This report provides an overview of current hydrologic conditions at selected stations. Level and flow data are sourced from both historical and real-time hydrometric data published by Water Survey of Canada. See below table for terms and definitions used in station tables.
@@ -409,11 +397,18 @@ data <br> Level stats were calculated using December 31, 2024 data
 
 # Conclusion
 
-This vignette has demonstrated how to use the `streamTrackR` project to
-generate a custom hydrometric report. Modify the parameters as needed to
-customize the stations, year of interest, and location for your specific
-requirements.
+This vignette has demonstrated how to use the `streamTrackR` package to
+generate a **custom hydrometric report**. By adjusting key
+parameters—such as **station selection, year of interest, and
+location**—users can tailor reports to their specific needs.
 
+Beyond the basic functionality covered here, `streamTrackR` provides
+flexibility for further customization, including **modifying
+visualizations, adjusting data formats, and integrating additional
+hydrometric datasets**.
+
+To explore more features, experiment with different parameter settings
+to generate reports that best suit your hydrological analysis needs.  
 <br>
 
 ### To modify this project
