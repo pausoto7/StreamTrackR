@@ -12,25 +12,41 @@ always_allow_html: true
 **Author:** Paula Soto    
 **Email:** paula.soto@dfo-mpo.gc.ca
 
-This vignette demonstrates how to use the `streamTrackR` project to generate hydrometric condition reports. The workflow utilizes an RMarkdown template and specified parameters to produce an HTML report using Water Survey of Canada (WSC) station data.
+This project provides a summary of current hydrologic conditions at selected stations using both historical records and real-time hydrometric data from the Water Survey of Canada. It includes key statistics for each station and visualizes water level or discharge trends within a historical context.
+
+The report is designed to facilitate quick comparisons between stations while incorporating real-time data and long-term trends.
+
+This vignette outlines the process for generating hydrometric condition reports. Using an RMarkdown template and user-defined parameters, the workflow produces an HTML report based on WSC station data.
 
 ### Setup Instructions
-1. Clone the project from the repository using your preferred method. Below is one example of how to do it in the R Studio terminal:
 
-```bash
-git clone https://github.com/pausoto7/StreamTrackR.git
-```
+1. Clone the project from the repository using your preferred method. One way to do this is to:
+
+   1. Open the [project on git](https://github.com/pausoto7/StreamTrackR.git)
+  
+   2. Click on the green `<> Code` icon  
+   
+   3. Copy the HTTPS cloning link  
+   
+   4. Open RStudio  
+   
+   5. Click on **File** in the top left corner and select **New Project**  
+   
+   6. Click on **Version Control → Git**, and then paste the Repository URL.  
+   
+   7. Name the project appropriately and then click **Create Project**  
    
 
-2. Install required R packages 
+2. Install required R packages
 
-Install `hydroGraphR` from GitHub. `hydroGraphR` is an R package designed to simplify the process of creating hydrographs. 
+Install `hydroGraphR` from GitHub. [hydroGraphR](https://github.com/pausoto7/hydroGraphR.git) is an R package designed to simplify the process of creating hydrographs. 
 ```{r hydrog, eval = FALSE}
 # Install devtools if not already installed
 install.packages("devtools")
+library(devtools)
 
 # Install hydroGraphR
-devtools::install_github("pausoto7/hydroGraphR")
+install_github("pausoto7/hydroGraphR")
 
 ```
 
@@ -38,76 +54,95 @@ Install the rest of the required R packages from CRAN:
 
 ```R
 install.packages(c("ggplot2",  "formattable", "knitr", "kableExtra",
-                       "rmarkdown", "lubridate", "dplyr", "tidyr"))
+                       "rmarkdown", "lubridate", "dplyr", "tidyr", "stringi", "here"))
 ```
 
-3. Open the project in RStudio and open `run_hydro_report.R` to begin. 
+3. Open the project in RStudio and open `run_hydro_report.R`. The file can found in the R project within the *R* folder. 
 
 
 # **Getting started**
 
 ## Setting Up 
 
-The first step is to download the required libraries and create an isolated environment for your script to run in.
+The first step is to download the required libraries and create an isolated environment for your script to run in.The rest of the libraries are run within the rmarkdown script which is why they're not loaded below. 
 
 ```{r createenv, results = 'hide', warning=FALSE, message=FALSE}
 
-library(tidyhydat)
-library(hydroGraphR) 
-library(dplyr)
 
-# Create a new environment for rendering 
+library(tidyhydat)
+library(tidyverse)
+
+#New environment for rmarkdown:render()
 isolated_env <- new.env()
 
+# if Reports folder doesn't already exist, then this creates one
+if (!dir.exists("Reports")){
+  dir.create("Reports")
+}
+
+
 ```
 
 
-## Define the file name and output directory
+## Define report parameters
 
-Next, define what the name of your file will be. In this example the report will be for conditions in the Yukon. Any information may be included here, but the file must end in ".html". In this example information on the location of the report is included along with the date it is run (today). Other information that could be helpful to include would be whether the report will be output in calendar or water year format. 
+Before generating the report, key parameters must be defined to specify the location, stations, time period, and formatting preferences. These parameters ensure that the report and report name are both descriptive and relevant to the analysis being conducted.
 
-The following lines add a "Reports" folder into the project if one doesn't already exist. 
+- **location_name**: this variable specifies the geographic area for the report. This name will be used in both the report title and file name.
+- **file_name** This determines the  reports file name. It is constructed dynamically using `sprintf()`, incorporating the location name, the date the report is run (`Sys.Date()`), and any other specified info. The report should be saved in the "Reports/" directory to keep outputs organized.
+- **station_IDs**: A list of WSC station IDs for stations that should be include in the report. Station ID's can be found on the [WSC website](https://wateroffice.ec.gc.ca/search/real_time_e.html). 
+- **YOI**: The year of interest for the data.
+- **WY**: Logical value indicating whether to present hydrograph by water year (Nov-Oct)(`TRUE`) or calendar year (Jan-Dec)(`FALSE`). For more information on water years see [here](https://www.ausableriver.org/blog/what-water-year#:~:text=Hydrologists%20measure%20time%20differently%20than,known%20as%20a%20water%20year.).
 
-```{r filename, results = 'hide', warning=FALSE, message=FALSE}
 
-file_name <- paste0("Reports/Yukon Condition Report", Sys.Date(), ".html")
 
-# Add a "Reports" folder if it doesn't already exist
-if (!dir.exists("Reports")) 
-  { dir.create("Reports") }
+```{r report, results = 'hide', warning=FALSE, message=FALSE}
+
+# LOCATION NAME
+location_name <- "Yukon"
+
+# FILE NAME
+file_name <- sprintf("Reports/%s Condition Report %s.html", location_name, Sys.Date())
+
+
+# STATION NAMES
+station_IDs <- c("09AG001", "09EA006", "09CA002", "09AE006", "09BC001", "09FD003", "09DD003",
+"09DD004", "09AC001",  "09CD001", "09AH001", "09EB001", "09AB001")
+
+
+# YOI
+YOI <- 2025
+
+#WY
+WY_type <- TRUE
+
 
 ```
+
 ## Rendering the Report
 
-The `rmarkdown::render` function is used to generate the report. The function takes the following parameters:
+The `rmarkdown::render` function is used to generate the report with the parameters specified above. 
 
-- **Stations**: A list of WSC station IDs for stations that should be include in the report. Station ID's can be found on the [WSC website](https://wateroffice.ec.gc.ca/search/real_time_e.html). 
-- **YOI**: The year of interest for the data.
-- **Location**: The location used for the title of the report.
-- **WY**: Logical value indicating whether to present hydrograph by water year (Nov-Oct)(`TRUE`) or calendar year (Jan-Dec)(`FALSE`).
+
 
 ```{r rmd, eval = FALSE}
 # Render the R Markdown report
-rmarkdown::render(
-  here::here("hydrometric_report.Rmd"),
+
+rmarkdown::render(here::here("hydrometric_report.Rmd"),
   output_file = file_name,
-  params = list(
-    stations = c(
-      "09AG001", "09EA006", "09CA002"
-    ),
-    YOI = 2025,
-    location = "Yukon", # To be used for the title of the report
-    WY  = FALSE
-  ),
-  envir = isolated_env
-)
+  params = list(stations =  stations_to_run , 
+                YOI = YOI, 
+                location = location_name,  # To be used for title of report
+                WY = WY_type),
+  envir = isolated_env)
+
 ```
 
 ## Viewing the Report
 
 Once the rendering process is complete, the report will be saved in the `Reports` directory. Open the HTML file to view the results.
 
-Note that all the figures produced in the report will also be present in the similarly named folder within the same `Reports` directory. 
+Note that all the figures produced in the report will also be present in the corresponding folder within the same `Reports` directory. 
 
 <br>
 
@@ -256,8 +291,8 @@ colnames(stats_table) <- c("Station Number", "Parameter", "Mean (Today)",
 
 
   # gets stats for flow and WL separately 
-  st_df_past <- create_hydro_stats_historical(all_stations_data, date_minimum = NA, date_maximum = max_date)
-  sf_df_currentYr <- create_hydro_stats_singleYr(all_stations_data, YOI, WY = WY)
+  st_df_past <- hydroGraphR::create_hydro_stats_historical(all_stations_data, date_minimum = NA, date_maximum = max_date)
+  sf_df_currentYr <- hydroGraphR::create_hydro_stats_singleYr(all_stations_data, YOI, WY = WY)
 
   
   # SET UP HYDROGRAPH ------------------------------------------------
@@ -273,16 +308,19 @@ colnames(stats_table) <- c("Station Number", "Parameter", "Mean (Today)",
 ```
   
 
-# Conclusion
+# Conclusion  
 
-This vignette has demonstrated how to use the `streamTrackR` project to generate a custom hydrometric report. Modify the parameters as needed to customize the stations, year of interest, and location for your specific requirements.
+This vignette has demonstrated how to use the `streamTrackR` package to generate a **custom hydrometric report**. By adjusting key parameters—such as **station selection, year of interest, and location**—users can tailor reports to their specific needs.  
 
+Beyond the basic functionality covered here, `streamTrackR` provides flexibility for further customization, including **modifying visualizations, adjusting data formats, and integrating additional hydrometric datasets**.  
+
+To explore more features, experiment with different parameter settings to generate reports that best suit your hydrological analysis needs.  
 <br>
 
 
 ### To modify this project
 If you'd like to modify this project, please **fork** it and make changes in your own version.
-If you have improvements, feel free to submit a **pull request**!
+If you have improvements, feel free to submit a **pull request**! 
 
 <br>
 
