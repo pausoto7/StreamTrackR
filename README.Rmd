@@ -53,7 +53,7 @@ install.packages(c("ggplot2",  "formattable", "knitr", "kableExtra",
 
 ## Setting Up 
 
-The first step is to download the required libraries and create an isolated environment for your script to run in.The rest of the libraries are run within the rmarkdown script which is why they're not loaded below. 
+Once you've opened `run_hydro_report.R`, the first step is to download the required libraries and create an isolated environment for your script to run in.The rest of the libraries are run within the rmarkdown script which is why they're not loaded below. 
 
 ```{r createenv, results = 'hide', warning=FALSE, message=FALSE}
 
@@ -75,7 +75,7 @@ if (!dir.exists("Reports")){
 
 ## Define report parameters
 
-Before generating the report, key parameters must be defined to specify the location, stations, time period, and formatting preferences. These parameters ensure that the report and report name are both descriptive and relevant to the analysis being conducted.
+Before generating the report, key parameters must be defined to specify the location, stations, time period, and formatting preferences for the report. These parameters ensure that the report and report name are both descriptive and relevant to the analysis being conducted.
 
 - **location_name**: this variable specifies the geographic area for the report. This name will be used in both the report title and file name.
 - **file_name** This determines the  reports file name. It is constructed dynamically using `sprintf()`, incorporating the location name, the date the report is run (`Sys.Date()`), and any other specified info. The report should be saved in the "Reports/" directory to keep outputs organized.
