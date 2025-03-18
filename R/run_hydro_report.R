@@ -57,7 +57,7 @@ WY_type <- TRUE
 
 rmarkdown::render(here::here("hydrometric_report.Rmd"),
   output_file = file_name,
-  params = list(stations =  stations_to_run , 
+  params = list(stations =  station_IDs , 
                 YOI = YOI, 
                 location = location_name,  # To be used for title of report
                 WY = WY_type),

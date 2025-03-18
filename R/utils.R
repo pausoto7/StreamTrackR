@@ -46,7 +46,7 @@ create_hydro_stats <- function(all_hydro_data_historical, all_hydro_data_YOI, pa
     
     current_mean_value <- NA
     
-    table_message <- sprintf("%s stats were unavailable for any dates this year.", param_type)
+    table_message <- sprintf("%s stats were not available for any dates this year.", param_type)
     
     warning(sprintf("The YOI data for station %s was not found. Value's for YOI will be NA and historical stats will be based off todays date (%s)", station_numb, df_Date))
     

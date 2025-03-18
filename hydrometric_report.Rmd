@@ -109,7 +109,7 @@ kable(definitions, "html", escape = FALSE, col.names = c("Term", "Definition")) 
 
 **Note:** The figures and analyses in this report are based on water level and discharge data.  
 Please be aware that the most recent two years of data are typically provisional and may be subject to revision.  
-This should be considered when interpreting historic and recent YOI traces.
+This should be considered when interpreting historical and recent YOI traces.
 
 ```{r read data, include=FALSE}
 
