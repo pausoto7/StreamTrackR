@@ -28,23 +28,30 @@ This vignette outlines the process for generating hydrometric condition reports.
 
 2. Install required R packages
 
-Install `hydroGraphR` from GitHub. [hydroGraphR](https://github.com/pausoto7/hydroGraphR.git) is an R package designed to simplify the process of creating hydrographs. 
-```{r hydrog, eval = FALSE}
-# Install devtools if not already installed
-install.packages("devtools")
-library(devtools)
+- Install required R packages from CRAN .
+- Install `hydroGraphR` from GitHub. [hydroGraphR](https://github.com/pausoto7/hydroGraphR.git) is an R package designed to simplify the process of creating hydrographs. 
 
+Both only need to be run the first time you run the script. 
+
+
+```{r, eval=FALSE}
+
+pkgs <- c("ggplot2", "formattable", "knitr", "kableExtra", "flextable",
+                       "rmarkdown", "lubridate", "dplyr", "tidyr", "stringi", "here")
+
+# install CRAN packagesS
+for (pkg in pkgs) {
+  if (!requireNamespace(pkg, quietly = TRUE)) {
+    message(paste("Installing missing package:", pkg))
+    install.packages(pkg)
+  }
+  
 # Install hydroGraphR
-install_github("pausoto7/hydroGraphR")
+devtools::install_github("pausoto7/hydroGraphR")
 
 ```
 
-Install the rest of the required R packages from CRAN:
 
-```R
-install.packages(c("ggplot2",  "formattable", "knitr", "kableExtra", flextable,
-                       "rmarkdown", "lubridate", "dplyr", "tidyr", "stringi", "here"))
-```
 
 3. Open the project in RStudio and open `run_hydro_report.R`. The file can be found in the R project within the *R* folder. 
 

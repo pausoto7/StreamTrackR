@@ -1,11 +1,25 @@
 
+# PACKAGES ----------------------------------------------------------------------
 
+# Download needed packages - only needs to be installed the first time script is run
 
-#set up-------------------------------------------------------------------------
+pkgs <- c("tidyhydat", "ggplot2", "formattable", "knitr", "kableExtra", "flextable",
+          "rmarkdown", "lubridate", "dplyr", "tidyr", "stringi", "here", "devtools")
 
+# install CRAN packages
+for (pkg in pkgs) {
+  if (!requireNamespace(pkg, quietly = TRUE)) {
+    message(paste("Installing missing package:", pkg))
+    install.packages(pkg)
+  }
+}
 
-library(tidyhydat)
-library(tidyverse)
+# install hydroGraphR
+devtools::install_github("pausoto7/hydroGraphR")
+
+# SET UP -------------------------------------------------------------------------
+
+# libraries are run within the script
 
 #New environment for rmarkdown:render()
 isolated_env <- new.env()
@@ -13,7 +27,6 @@ isolated_env <- new.env()
 if (!dir.exists("Reports")){
   dir.create("Reports")
 }
-
 
 # Choose parameters ------------------------------------------------------------
 
