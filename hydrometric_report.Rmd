@@ -61,7 +61,7 @@ source("R/utils.R")
 
 ##### This report provides an overview of current hydrologic conditions at selected stations. Water level and flow data are sourced from both historical records and real-time hydrometric data published by the Water Survey of Canada. The report includes a table summarizing key statistics for each station and presents the year of interest’s trace (either water level or discharge) within a historical context.
 
-#####The primary goal of this report is to facilitate quick and easy comparisons between stations and their historical trends. See the table below for definitions of terms used in the station summaries.
+##### The primary goal of this report is to facilitate quick and easy comparisons between stations and their historical trends. See the table below for definitions of terms used in the station summaries.
 
 ---
 
